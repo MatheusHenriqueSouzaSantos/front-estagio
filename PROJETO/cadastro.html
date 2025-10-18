@@ -69,60 +69,60 @@
               
               <div id="camposFisico" style="display:none;">
                 <div class="mb-3">
-                  <label for="nome" class="form-label">Nome:</label>
-                  <input type="text" class="form-control" id="nome" />
+                  <label for="nome" class="form-label">Nome: <span style="color: red;">*</span></label>
+                  <input type="text" class="form-control" id="input-nome" required />
                 </div>
                 <div class="mb-3">
-                  <label for="cpf" class="form-label">CPF:</label>
-                  <input type="text" class="form-control" id="cpf" />
+                  <label for="cpf" class="form-label">CPF: <span style="color: red;">*</span></label>
+                  <input type="text" class="form-control" id="input-cpf" required />
                 </div>
               </div>
 
               
               <div id="camposJuridico" style="display:none;">
                 <div class="mb-3">
-                  <label for="razaoSocial" class="form-label">Razão Social:</label>
-                  <input type="text" class="form-control" id="razaoSocial" />
+                  <label for="razaoSocial" class="form-label">Razão Social: <span style="color: red;">*</span></label>
+                  <input type="text" class="form-control" id="input-razao-social" required />
                 </div>
                 <div class="mb-3">
                   <label for="nomeFantasia" class="form-label">Nome Fantasia (opcional):</label>
-                  <input type="text" class="form-control" id="nomeFantasia" />
+                  <input type="text" class="form-control" id="input-nome-fantasia" />
                 </div>
                 <div class="mb-3">
                   <label for="inscricaoEstadual" class="form-label">Inscrição Estadual (opcional):</label>
-                  <input type="text" class="form-control" id="inscricaoEstadual" />
+                  <input type="text" class="form-control" id="input-inscricao-estadual" />
                 </div>
                 <div class="mb-3">
-                  <label for="cnpj" class="form-label">CNPJ:</label>
-                  <input type="text" class="form-control" id="cnpj" />
+                  <label for="cnpj" class="form-label">CNPJ: <span style="color: red;">*</span></label>
+                  <input type="text" class="form-control" id="input-cnpj" required />
                 </div>
               </div>
 
               <div id="campos-comuns" style="display:none;" >
                 <div class="mb-3">
-                <label for="telefone" class="form-label">Telefone:</label>
-                <input type="tel" class="form-control" id="telefone" />
+                <label for="telefone" class="form-label">Telefone: <span style="color: red;">*</span></label>
+                <input type="tel" class="form-control" id="input-telefone" required />
                 </div>
 
                 <div class="mb-3">
-                <label for="email" class="form-label">Email:</label>
-                <input type="email" class="form-control" id="email" />
+                <label for="email" class="form-label">Email: <span style="color: red;">*</span></label>
+                <input type="email" class="form-control" id="input-email" required />
                 </div>
                 <div class="mb-3">
-                <label for="logradouro" class="form-label">Logradouro:</label>
-                <input type="text" class="form-control" id="logradouro" />
+                <label for="logradouro" class="form-label">Logradouro: <span style="color: red;">*</span></label>
+                <input type="text" class="form-control" id="input-logradouro" required />
                 </div>
                 <div class="mb-3">
-                <label for="numero" class="form-label">Número:</label>
-                <input type="text" class="form-control" id="numero" />
+                <label for="numero" class="form-label">Número: <span style="color: red;">*</span></label>
+                <input type="text" class="form-control" id="input-numero-do-local" required />
                 </div>
                 <div class="mb-3">
-                <label for="cidade" class="form-label">Cidade:</label>
-                <input type="text" class="form-control" id="cidade" />
+                <label for="cidade" class="form-label">Cidade: <span style="color: red;">*</span></label>
+                <input type="text" class="form-control" id="input-cidade" required />
                 </div>
                 <div class="mb-3">
-                <label for="siglaUF" class="form-label">Sigla UF:</label>
-                <input type="text" class="form-control" id="siglaUF" maxlength="2" />
+                <label for="siglaUF" class="form-label">Sigla UF: <span style="color: red;">*</span></label>
+                <input type="text" class="form-control" id="input-sigla-uf" maxlength="2" required />
                 </div>
               
                 <button type="submit" class="btn btn-primary botao-cadastrar">
@@ -145,19 +145,33 @@
 
     
     <script>
-      const tipoSelect = document.getElementById("tipoCliente");
+      const selectTipoCliente=document.getElementById("select-tipo-cliente");
       const camposFisico = document.getElementById("camposFisico");
       const camposJuridico = document.getElementById("camposJuridico");
       const camposComuns= document.getElementById("campos-comuns");
       const formularioCliente=document.getElementById("formulario-cliente");
-      const selectTipoCliente=document.getElementById("select-tipo-cliente");
-      tipoSelect.addEventListener("change", () => {
-        if (tipoSelect.value === "fisico") {
+      //usar.value?
+      const inputTelefone=document.getElementById("input-telefone");
+      const inputEmail=document.getElementById("input-email");
+      const inputLogradouro=document.getElementById("input-logradouro");
+      const inputNumeroDoLocal=document.getElementById("iput-numero-do-local");
+      const inputCidade=document.getElementById("input-cidade");
+      const inputSiglaUf=document.getElementById("input-sigla-uf")
+      //pessoa fisica
+      const inputNome=document.getElementById("input-nome");
+      const inputCpf=document.getElementById("input-cpf");
+      //pessoa juridica
+      const inputRazaoSocial=document.getElementById("input-razao-social");
+      const inputNomeFantasia=document.getElementById("input-nome-fantasia");
+      const inputInscricaoEstadual=document.getElementById("input-inscricao-estadual");
+      const inputCnpj=document.getElementById("input-cnpj")
+      selectTipoCliente.addEventListener("change", () => {
+        if (selectTipoCliente.value === "fisico") {
           camposFisico.style.display = "block";
           camposJuridico.style.display = "none";
           camposComuns.style.display = "block";
 
-        } else if (tipoSelect.value === "juridico") {
+        } else if (selectTipoCliente.value === "juridico") {
           camposFisico.style.display = "none";
           camposJuridico.style.display = "block";
           camposComuns.style.display = "block";
@@ -167,18 +181,26 @@
           camposComuns.style.display = "none";
         }
       });
-      formularioCliente.addEventListener("submit",()=>{
+      formularioCliente.addEventListener("submit",(e)=>{
+        e.preventDefault();
         if(selectTipoCliente.value=="fisico"){
-          
+          true
+          validarDadosAEnviarParaApi();
         }
         else if(selectTipoCliente.value=="juridico"){
 
+          true
+          validarDadosAEnviarParaApi();
         }
         else{
           console.log("erro!!!")
         }
       });
 
+
+      function validarDadosAEnviarParaApi(){
+
+      }
     </script>
   </body>
 </html>
