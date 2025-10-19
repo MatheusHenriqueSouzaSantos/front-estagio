@@ -41,21 +41,29 @@ body {
   z-index: 3 !important;
 }
 /*transform*/
-.aviso-acao{
-    display: none;
-    position: absolute;
+.div-aviso{
+    position: fixed;
     width: 32%;
     height: 33vh;
     z-index: 3 !important;
     left: 34%;
-    top: 28%;
+    top: 150%;
     border-radius: 1rem;
     color: white;
-    border: #cdc5c5 5px solid;
+    transition: top 2s ease;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.div-aviso-subir{
+   top: 28% ;
 }
 .sucesso{
     background-color: #4caf50;
+    opacity: 0.8;
 }
 .erro{
     background-color: #f44336;
+    opacity: 0.8;
 }

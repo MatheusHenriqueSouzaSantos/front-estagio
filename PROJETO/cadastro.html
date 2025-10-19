@@ -75,6 +75,7 @@
                 <div class="mb-3">
                   <label for="cpf" class="form-label">CPF: <span style="color: red;">*</span></label>
                   <input type="text" class="form-control" id="input-cpf" required />
+                  <span id="span-cpf-invalido" style="color: red;display: none;" >Cpf Inválido</span>
                 </div>
               </div>
 
@@ -91,10 +92,12 @@
                 <div class="mb-3">
                   <label for="inscricaoEstadual" class="form-label">Inscrição Estadual (opcional):</label>
                   <input type="text" class="form-control" id="input-inscricao-estadual" />
+                  <span id="span-inscricao-estadual-invalido" style="color: red;display: none;" >Cpf Inválido</span>
                 </div>
                 <div class="mb-3">
                   <label for="cnpj" class="form-label">CNPJ: <span style="color: red;">*</span></label>
                   <input type="text" class="form-control" id="input-cnpj" required />
+                  <span id="span-cnpj-invalido" style="color: red; display: none;" >Cnpj Inválido</span>
                 </div>
               </div>
 
@@ -133,8 +136,7 @@
             </form>
           </div>
 
-          <div class="aviso-acao ">
-
+          <div class="div-aviso">
           </div>
         </main>
       </div>
@@ -145,16 +147,16 @@
 
     
     <script>
+      const divAviso=document.getElementsByClassName("div-aviso")[0];
       const selectTipoCliente=document.getElementById("select-tipo-cliente");
       const camposFisico = document.getElementById("camposFisico");
       const camposJuridico = document.getElementById("camposJuridico");
       const camposComuns= document.getElementById("campos-comuns");
       const formularioCliente=document.getElementById("formulario-cliente");
-      //usar.value?
       const inputTelefone=document.getElementById("input-telefone");
       const inputEmail=document.getElementById("input-email");
       const inputLogradouro=document.getElementById("input-logradouro");
-      const inputNumeroDoLocal=document.getElementById("iput-numero-do-local");
+      const inputNumeroDoLocal=document.getElementById("input-numero-do-local");
       const inputCidade=document.getElementById("input-cidade");
       const inputSiglaUf=document.getElementById("input-sigla-uf")
       //pessoa fisica
@@ -164,8 +166,13 @@
       const inputRazaoSocial=document.getElementById("input-razao-social");
       const inputNomeFantasia=document.getElementById("input-nome-fantasia");
       const inputInscricaoEstadual=document.getElementById("input-inscricao-estadual");
-      const inputCnpj=document.getElementById("input-cnpj")
+      const inputCnpj=document.getElementById("input-cnpj");
+
+      const spanCpfInvalido=document.getElementById("span-cpf-invalido");
+      const spanCnpjInvalido=document.getElementById("span-cnpj-invalido");
+      const spanInscricaoEstadualInvalido=document.getElementById("span-inscricao-estadual-invalido");
       selectTipoCliente.addEventListener("change", () => {
+        DefinirOsCamposASeremRequired(selectTipoCliente.value);
         if (selectTipoCliente.value === "fisico") {
           camposFisico.style.display = "block";
           camposJuridico.style.display = "none";
@@ -181,43 +188,59 @@
           camposComuns.style.display = "none";
         }
       });
-      formularioCliente.addEventListener("submit",(e)=>{
+      formularioCliente.addEventListener("submit",(e)=>{   
         e.preventDefault();
         if(selectTipoCliente.value=="fisico"){
           let cpfValido=validarCpf(inputCpf.value);
           if(!cpfValido){
-            //mensagem de erro
+            spanCpfInvalido.style.display="inline"
+            return;
           }
           enviarDadosParaCriarUsuarioFisicoNaApi(inputLogradouro.value,inputNumeroDoLocal.value,inputCidade.value,inputSiglaUf.value,
             inputTelefone.value,inputEmail.value, inputNome.value,inputCpf.value);
         }
         else if(selectTipoCliente.value=="juridico"){
-          let cnpjValido=validarDadosPessoaJuridicaAEnviarParaApi(inputCnpj.value);
+          let cnpjValido=validarCnpj(inputCnpj.value);
           let inscricaoEstadualVazia=(inputInscricaoEstadual.value =="");
-          let inscricaoEstadualValida;
-          if(!inscricaoEstadualVazia){
-              inscricaoEstadualValida=validarInscricaoEstadual(inputInscricaoEstadual.value)
+          let inscricaoEstadualValidaParaEnviar=false;
+          
+          if(inputInscricaoEstadualVazia){
+            inscricaoEstadualValidaParaEnviar=true
           }
-          if(inscricaoEstadualVazia){
-            if(cnpjValido){
-              enviarDadosParaCriarUsuarioJuridicoNaApi();
-            }
-          if(cnpjValido  && inscricaoEstadualValida ){
-            enviarDadosParaCriarUsuarioJuridicoNaApi();
-          } 
-          //erro 
+          else{
+            inscricaoEstadualValidaParaEnviar=validarInscricaoEstadual(inputInscricaoEstadual.value)
           }
+          if(cnpjValido==false){
+            spanCnpjInvalido.style.display="inline"
+            return;
+          }
+          if(inscricaoEstadualValidaParaEnviar==false){
+           spanInscricaoEstadualInvalido.style.display = "inline";
+            return;
+          }
+          enviarDadosParaCriarUsuarioJuridicoNaApi(inputLogradouro.value,inputNumeroDoLocal.value,inputCidade.value,inputSiglaUf.value,
+             inputTelefone.value,inputEmail.value,inputRazaoSocial.value,inputInscricaoEstadual.value,inputNomeFantasia.value,inputCnpj.value );
           
         }
         else{
           console.log("erro!!!")
         }
       });
+      inputCpf.addEventListener("input",()=>{
+        spanCpfInvalido.style.display="none";
+      })
+       inputCnpj.addEventListener("input",()=>{
+        spanCnpjInvalido.style.display="none";
+      })
 
+       inputInscricaoEstadual.addEventListener("input",()=>{
+        spanInscricaoEstadualInvalido.style.display="none";
+      })
+      
       function validarCpf(cpf){
         let cpfSomenteNumeros= cpf.replace(/\D/g,"");
 
-        if(cpfSomenteNumeros!=11){
+        if(cpfSomenteNumeros.length!=11){
           return false;
         }
         if(cpfSomenteNumeros.split("").every(c=>c===cpfSomenteNumeros[0])){
@@ -252,9 +275,9 @@
       }
 
       function validarCnpj(cnpj){
-        let cnpjSomenteNumeros= cpf.replace(/\D/g,"");
+        let cnpjSomenteNumeros= cnpj.replace(/\D/g,"");
 
-        if(cnpjSomenteNumeros!=14){
+        if(cnpjSomenteNumeros.length!=14){
           return false;
         }
         if(cnpjSomenteNumeros.split("").every(c=>c===cnpjSomenteNumeros[0])){
@@ -290,11 +313,11 @@
 
 
       function validarInscricaoEstadual(inscricaoEstadual){
-        if(inscricaoEstadual ==""){
-          return true;
-        }
         let inscricaoEstadualSomentenumeros= inscricaoEstadual.replace(/\D/g,"");
-        if(inscricaoEstadual!=9){
+        if(inscricaoEstadualSomentenumeros.length!=10){
+          return false;
+        }
+         if(inscricaoEstadualSomentenumeros.split("").every(c=>c===inscricaoEstadualSomentenumeros[0])){
           return false;
         }
         return true;
@@ -318,18 +341,119 @@
           headers: {
           "Content-Type": "application/json" 
           },
-          body:  JSON.stringiFy(dados)
+          body:  JSON.stringify(dados)
         }).then(response=>{
           if(!response.ok){
-            throw new Error("Erro na requisição")
+            divAviso.textContent="Erro no envio de dados"
+            divAviso.classList.add("div-aviso-subir");
+            divAviso.classList.add("erro");
+            setTimeout(()=>{
+              divAviso.classList.remove("div-aviso-subir");
+              setTimeout(()=>{
+                divAviso.textContent="";
+                divAviso.classList.remove("erro");
+              },2000)
+            },2000)
+            return
           }
-          return true;
+          divAviso.textContent="Sucesso no envio de dados"
+            divAviso.classList.add("div-aviso-subir");
+            divAviso.classList.add("sucesso");
+            setTimeout(()=>{
+              divAviso.classList.remove("div-aviso-subir");
+              setTimeout(()=>{
+                divAviso.textContent="";
+                divAviso.classList.remove("sucesso");
+              },2000)
+            },2000)
         }).catch(erro=>{
-          //erro
+            divAviso.textContent="Erro no envio de dados"
+            divAviso.classList.add("div-aviso-subir");
+            divAviso.classList.add("erro");
+            setTimeout(()=>{
+              divAviso.classList.remove("div-aviso-subir");
+              setTimeout(()=>{
+                divAviso.textContent="";
+                divAviso.classList.remove("erro");
+              },2000)
+            },2000)
         })
       }
-      function enviarDadosParaCriarUsuarioJuridicoNaApi(){
+      function enviarDadosParaCriarUsuarioJuridicoNaApi(logradouro,numeroDoLocal,cidade,siglaUf,telefone,email,
+      razaoSocial,inscricaoEstadual,nomeFantasia,cnpj){
+        let dados={
+          endereco:{
+            logradouro: logradouro,
+            numero: numeroDoLocal,
+            cidade: cidade,
+            siglaUf: siglaUf,
+          },
+          telefone : telefone,
+          email : email,
+          razaoSocial : razaoSocial,
+          inscricaoEstadual : inscricaoEstadual,
+          nomeFantasia : nomeFantasia,
+          cnpj : cnpj
+        }
+        fetch("https://localhost:7036/api/cliente/juridico",{
+          method: "POST",
+          headers: {
+          "Content-Type": "application/json" 
+          },
+          body:  JSON.stringify(dados)
+        }).then(response=>{
+          if(!response.ok){
+            divAviso.textContent="Erro no envio de dados"
+            divAviso.classList.add("div-aviso-subir");
+            divAviso.classList.add("erro");
+            setTimeout(()=>{
+              divAviso.classList.remove("div-aviso-subir");
+              setTimeout(()=>{
+                divAviso.textContent="";
+                divAviso.classList.remove("erro");
+              },2000)
+            },2000)
+            return
+          }
+          divAviso.textContent="Sucesso no envio de dados"
+            divAviso.classList.add("div-aviso-subir");
+            divAviso.classList.add("sucesso");
+            setTimeout(()=>{
+              divAviso.classList.remove("div-aviso-subir");
+              setTimeout(()=>{
+                divAviso.textContent="";
+                divAviso.classList.remove("sucesso");
+              },2000)
+            },2000)
+        }).catch(erro=>{
+            divAviso.textContent="Erro no envio de dados"
+            divAviso.classList.add("div-aviso-subir");
+            divAviso.classList.add("erro");
+            setTimeout(()=>{
+              divAviso.classList.remove("div-aviso-subir");
+              setTimeout(()=>{
+                divAviso.textContent="";
+                divAviso.classList.remove("erro");
+              },2000)
+            },2000)
+          
+        })
+      }
+      function DefinirOsCamposASeremRequired(tipocliente){
+        if(tipocliente=="fisico"){
+          inputNome.required=true;
+          inputCpf.required=true;
 
+          inputRazaoSocial.required=false;
+          inputCnpj.required=false;
+        }
+        if(tipocliente=="juridico"){
+          inputRazaoSocial.required=true;
+          inputCnpj.required=true;
+
+          inputNome.required=false;
+          inputCpf.required=false;
+        }
       }
     </script>
   </body>
