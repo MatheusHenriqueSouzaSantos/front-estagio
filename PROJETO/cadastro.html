@@ -184,21 +184,151 @@
       formularioCliente.addEventListener("submit",(e)=>{
         e.preventDefault();
         if(selectTipoCliente.value=="fisico"){
-          true
-          validarDadosAEnviarParaApi();
+          let cpfValido=validarCpf(inputCpf.value);
+          if(!cpfValido){
+            //mensagem de erro
+          }
+          enviarDadosParaCriarUsuarioFisicoNaApi(inputLogradouro.value,inputNumeroDoLocal.value,inputCidade.value,inputSiglaUf.value,
+            inputTelefone.value,inputEmail.value, inputNome.value,inputCpf.value);
         }
         else if(selectTipoCliente.value=="juridico"){
-
-          true
-          validarDadosAEnviarParaApi();
+          let cnpjValido=validarDadosPessoaJuridicaAEnviarParaApi(inputCnpj.value);
+          let inscricaoEstadualVazia=(inputInscricaoEstadual.value =="");
+          let inscricaoEstadualValida;
+          if(!inscricaoEstadualVazia){
+              inscricaoEstadualValida=validarInscricaoEstadual(inputInscricaoEstadual.value)
+          }
+          if(inscricaoEstadualVazia){
+            if(cnpjValido){
+              enviarDadosParaCriarUsuarioJuridicoNaApi();
+            }
+          if(cnpjValido  && inscricaoEstadualValida ){
+            enviarDadosParaCriarUsuarioJuridicoNaApi();
+          } 
+          //erro 
+          }
+          
         }
         else{
           console.log("erro!!!")
         }
       });
 
+      function validarCpf(cpf){
+        let cpfSomenteNumeros= cpf.replace(/\D/g,"");
 
-      function validarDadosAEnviarParaApi(){
+        if(cpfSomenteNumeros!=11){
+          return false;
+        }
+        if(cpfSomenteNumeros.split("").every(c=>c===cpfSomenteNumeros[0])){
+          return false;
+        }
+        let multiplicador1=[10,9,8,7,6,5,4,3,2];
+        let multiplicador2=[11,10,9,8,7,6,5,4,3,2];
+
+        let modeloCpfValido=cpfSomenteNumeros.substring(0,9);
+        let soma=0;
+        for(let i=0;i<9; i++)
+        {
+          soma+= (parseInt(modeloCpfValido[i],10) * multiplicador1[i]);
+        }
+        let resto= soma % 11;
+        let primeiroDigitoVerificador= resto <2 ? 0 : 11-resto;
+
+        modeloCpfValido+=(primeiroDigitoVerificador.toString())
+        soma=0;
+
+        for(let i=0;i<10; i++)
+        {
+          soma+= (parseInt(modeloCpfValido[i],10) * multiplicador2[i]);
+        }
+        resto= soma % 11;
+        let segundoDigitoVerificador= resto <2 ? 0 : 11-resto;
+        modeloCpfValido+=(segundoDigitoVerificador.toString())
+        if(modeloCpfValido!= cpfSomenteNumeros){
+          return false;
+        }
+        return true;
+      }
+
+      function validarCnpj(cnpj){
+        let cnpjSomenteNumeros= cpf.replace(/\D/g,"");
+
+        if(cnpjSomenteNumeros!=14){
+          return false;
+        }
+        if(cnpjSomenteNumeros.split("").every(c=>c===cnpjSomenteNumeros[0])){
+          return false;
+        }
+        let multiplicador1=[5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 ];
+        let multiplicador2=[6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+        let modeloCnpjValido=cnpjSomenteNumeros.substring(0,12);
+        let soma=0;
+        for(let i=0;i<12; i++)
+        {
+          soma+= (parseInt(modeloCnpjValido[i],10) * multiplicador1[i]);
+        }
+        let resto= soma % 11;
+        let primeiroDigitoVerificador= resto <2 ? 0 : 11-resto;
+
+        modeloCnpjValido+=(primeiroDigitoVerificador.toString())
+        soma=0;
+
+        for(let i=0;i<13; i++)
+        {
+          soma+= (parseInt(modeloCnpjValido[i],10) * multiplicador2[i]);
+        }
+        resto= soma % 11;
+        let segundoDigitoVerificador= resto <2 ? 0 : 11-resto;
+        modeloCnpjValido+=(segundoDigitoVerificador.toString())
+        if(modeloCnpjValido!= cnpjSomenteNumeros){
+          return false;
+        }
+        return true;
+      }
+
+
+      function validarInscricaoEstadual(inscricaoEstadual){
+        if(inscricaoEstadual ==""){
+          return true;
+        }
+        let inscricaoEstadualSomentenumeros= inscricaoEstadual.replace(/\D/g,"");
+        if(inscricaoEstadual!=9){
+          return false;
+        }
+        return true;
+      }
+
+      function enviarDadosParaCriarUsuarioFisicoNaApi(logradouro,numeroDoLocal,cidade,siglaUf,telefone,email,nome,cpf){
+        let dados={
+          endereco:{
+            logradouro: logradouro,
+            numero: numeroDoLocal,
+            cidade: cidade,
+            siglaUf: siglaUf,
+          },
+          telefone : telefone,
+          email : email,
+          nome : nome,
+          cpf : cpf
+        }
+        fetch("https://localhost:7036/api/cliente/fisico",{
+          method: "POST",
+          headers: {
+          "Content-Type": "application/json" 
+          },
+          body:  JSON.stringiFy(dados)
+        }).then(response=>{
+          if(!response.ok){
+            throw new Error("Erro na requisição")
+          }
+          return true;
+        }).catch(erro=>{
+          //erro
+        })
+      }
+      function enviarDadosParaCriarUsuarioJuridicoNaApi(){
 
       }
     </script>
