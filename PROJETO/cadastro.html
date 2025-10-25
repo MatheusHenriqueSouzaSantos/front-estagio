@@ -7,7 +7,7 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styleCadastro.css" />
+    <link rel="stylesheet" href="css/styleCadastro.css" />
     <title>Cadastro de Cliente</title>
   </head>
 
@@ -15,7 +15,7 @@
     <div class="barra-horizontal">
           <nav class="navbar navbar-expand-lg bg-body-tertiary">
             <div class="container-fluid">
-              <a class="navbar-brand" href="#">Home</a>
+              <a class="navbar-brand" href="home.html">Home</a>
               <button
                 class="navbar-toggler"
                 type="button"
@@ -41,9 +41,10 @@
                       Menu
                     </a>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="cadastro.html">Clientes</a></li>
-                      <li><a class="dropdown-item" href="produtos.html">Produtos</a></li>
-                      <li><a class="dropdown-item" href="#">Outro</a></li>
+                      <li><a class="dropdown-item" href="buscar_clientes.php">Clientes</a></li>
+                      <li><a class="dropdown-item" href="listar_produtos.php">Produtos</a></li>
+                      <li><a class="dropdown-item" href="#">Serviços</a></li>
+                      <li><a class="dropdown-item" href="#">Vendas</a></li>
                     </ul>
                   </li>
                 </ul>
@@ -323,122 +324,75 @@
         return true;
       }
 
-      function enviarDadosParaCriarUsuarioFisicoNaApi(logradouro,numeroDoLocal,cidade,siglaUf,telefone,email,nome,cpf){
-        let dados={
-          endereco:{
-            logradouro: logradouro,
-            numero: numeroDoLocal,
-            cidade: cidade,
-            siglaUf: siglaUf,
-          },
-          telefone : telefone,
-          email : email,
-          nome : nome,
-          cpf : cpf
-        }
-        fetch("https://localhost:7036/api/cliente/fisico",{
-          method: "POST",
-          headers: {
-          "Content-Type": "application/json" 
-          },
-          body:  JSON.stringify(dados)
-        }).then(response=>{
-          if(!response.ok){
-            divAviso.textContent="Erro no envio de dados"
-            divAviso.classList.add("div-aviso-subir");
-            divAviso.classList.add("erro");
-            setTimeout(()=>{
-              divAviso.classList.remove("div-aviso-subir");
-              setTimeout(()=>{
-                divAviso.textContent="";
-                divAviso.classList.remove("erro");
-              },2000)
-            },2000)
-            return
-          }
-          divAviso.textContent="Sucesso no envio de dados"
-            divAviso.classList.add("div-aviso-subir");
-            divAviso.classList.add("sucesso");
-            setTimeout(()=>{
-              divAviso.classList.remove("div-aviso-subir");
-              setTimeout(()=>{
-                divAviso.textContent="";
-                divAviso.classList.remove("sucesso");
-              },2000)
-            },2000)
-        }).catch(erro=>{
-            divAviso.textContent="Erro no envio de dados"
-            divAviso.classList.add("div-aviso-subir");
-            divAviso.classList.add("erro");
-            setTimeout(()=>{
-              divAviso.classList.remove("div-aviso-subir");
-              setTimeout(()=>{
-                divAviso.textContent="";
-                divAviso.classList.remove("erro");
-              },2000)
-            },2000)
-        })
-      }
-      function enviarDadosParaCriarUsuarioJuridicoNaApi(logradouro,numeroDoLocal,cidade,siglaUf,telefone,email,
-      razaoSocial,inscricaoEstadual,nomeFantasia,cnpj){
-        let dados={
-          endereco:{
-            logradouro: logradouro,
-            numero: numeroDoLocal,
-            cidade: cidade,
-            siglaUf: siglaUf,
-          },
-          telefone : telefone,
-          email : email,
-          razaoSocial : razaoSocial,
-          inscricaoEstadual : inscricaoEstadual,
-          nomeFantasia : nomeFantasia,
-          cnpj : cnpj
-        }
-        fetch("https://localhost:7036/api/cliente/juridico",{
-          method: "POST",
-          headers: {
-          "Content-Type": "application/json" 
-          },
-          body:  JSON.stringify(dados)
-        }).then(response=>{
-          if(!response.ok){
-            divAviso.textContent="Erro no envio de dados"
-            divAviso.classList.add("div-aviso-subir");
-            divAviso.classList.add("erro");
-            setTimeout(()=>{
-              divAviso.classList.remove("div-aviso-subir");
-              setTimeout(()=>{
-                divAviso.textContent="";
-                divAviso.classList.remove("erro");
-              },2000)
-            },2000)
-            return
-          }
-          divAviso.textContent="Sucesso no envio de dados"
-            divAviso.classList.add("div-aviso-subir");
-            divAviso.classList.add("sucesso");
-            setTimeout(()=>{
-              divAviso.classList.remove("div-aviso-subir");
-              setTimeout(()=>{
-                divAviso.textContent="";
-                divAviso.classList.remove("sucesso");
-              },2000)
-            },2000)
-        }).catch(erro=>{
-            divAviso.textContent="Erro no envio de dados"
-            divAviso.classList.add("div-aviso-subir");
-            divAviso.classList.add("erro");
-            setTimeout(()=>{
-              divAviso.classList.remove("div-aviso-subir");
-              setTimeout(()=>{
-                divAviso.textContent="";
-                divAviso.classList.remove("erro");
-              },2000)
-            },2000)
-          
-        })
-      }
+      function enviarDadosParaCriarUsuarioFisicoNaApi(logradouro, numeroDoLocal, cidade, siglaUf, telefone, email, nome, cpf) {
+  let dados = {
+    tipoCliente: 0,
+    endereco: {
+      logradouro,
+      numero: numeroDoLocal,
+      cidade,
+      siglaUf,
+    },
+    telefone,
+    email,
+    nome,
+    cpf
+  };
+
+  fetch("http://localhost:5105/api/cliente/fisico", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dados)
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("Erro no envio");
+      mostrarAviso("Sucesso no envio de dados", "sucesso");
+    })
+    .catch(() => mostrarAviso("Erro no envio de dados", "erro"));
+}
+
+function enviarDadosParaCriarUsuarioJuridicoNaApi(logradouro, numeroDoLocal, cidade, siglaUf, telefone, email,
+  razaoSocial, inscricaoEstadual, nomeFantasia, cnpj) {
+
+  let dados = {
+    tipoCliente: 1,
+    endereco: {
+      logradouro,
+      numero: numeroDoLocal,
+      cidade,
+      siglaUf,
+    },
+    telefone,
+    email,
+    razaoSocial,
+    inscricaoEstadual,
+    nomeFantasia,
+    cnpj
+  };
+
+  fetch("http://localhost:5105/api/cliente/juridico", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dados)
+  })
+    .then(response => {
+      if (!response.ok) throw new Error("Erro no envio");
+      mostrarAviso("Sucesso no envio de dados", "sucesso");
+    })
+    .catch(() => mostrarAviso("Erro no envio de dados", "erro"));
+}
+
+function mostrarAviso(mensagem, tipo) {
+  divAviso.textContent = mensagem;
+  divAviso.classList.add("div-aviso-subir", tipo);
+  setTimeout(() => {
+    divAviso.classList.remove("div-aviso-subir");
+    setTimeout(() => {
+      divAviso.textContent = "";
+      divAviso.classList.remove(tipo);
+    }, 2000);
+  }, 2000);
+}
       function DefinirOsCamposASeremRequired(tipocliente){
         if(tipocliente=="fisico"){
           inputNome.required=true;
