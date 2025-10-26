@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Clientes</title>
+  <title>Lista de Serviços</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/buscar_clientes.css">
+  <link rel="stylesheet" href="css/styleListaProdutos.css">
 </head>
 
 <body>
@@ -38,29 +38,26 @@
   <!-- CONTEÚDO -->
   <div class="container mt-5">
     <div class="form-box">
-      <h2 class="text-center mb-4">Lista de Clientes</h2>
+      <h2 class="text-center mb-4">Lista de Serviços</h2>
 
       <table class="table table-striped align-middle text-center">
         <thead class="table-secondary">
           <tr>
             <th>ID</th>
-            <th>Tipo</th>
-            <th>Nome / Razão Social</th>
-            <th>CPF / CNPJ</th>
-            <th>Telefone</th>
-            <th>Email</th>
-            <th>Cidade</th>
-            <th>UF</th>
+            <th>Nome</th>
+            <th>Código do Serviço</th>
+            <th>Descrição</th>
+            <th>Preço (R$)</th>
             <th>Ações</th>
           </tr>
         </thead>
-        <tbody id="tabela-clientes">
-          <tr><td colspan="9" class="text-muted">Carregando clientes...</td></tr>
+        <tbody id="tabela-servico">
+          <tr><td colspan="9" class="text-muted">Carregando serviços...</td></tr>
         </tbody>
       </table>
 
       <!-- BOTÃO FLUTUANTE -->
-      <a href="cadastro.html" 
+      <a href="servicos.html" 
          class="btn btn-success position-fixed bottom-0 end-0 m-4 rounded-circle shadow"
          style="width: 60px; height: 60px; font-size: 28px; display: flex; align-items: center; justify-content: center;">
          +
@@ -71,53 +68,43 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // URL do backend
-    const API_URL = "https://localhost:7036/api/cliente";
+    const API_URL = "https://localhost:7036/api/servico";
 
-    async function carregarClientes() {
-      const tabela = document.getElementById("tabela-clientes");
+    async function carregarServico() {
+      const tabela = document.getElementById("tabela-servico");
       tabela.innerHTML = `<tr><td colspan="9" class="text-muted">Carregando...</td></tr>`;
 
       try {
-        const resposta = await fetch(API_URL,{
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*'
-            }
-          });
+        const resposta = await fetch(API_URL, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
         if (!resposta.ok) {
           tabela.innerHTML = `<tr><td colspan="9" class="text-danger">Erro: ${resposta.status} - ${resposta.statusText}</td></tr>`;
           return;
         }
 
-        const clientes = await resposta.json();
+        const servicos = await resposta.json();
 
-        if (!Array.isArray(clientes) || clientes.length === 0) {
-          tabela.innerHTML = `<tr><td colspan="9" class="text-muted">Nenhum cliente encontrado.</td></tr>`;
+        if (!Array.isArray(servicos) || servicos.length === 0) {
+          tabela.innerHTML = `<tr><td colspan="9" class="text-muted">Nenhum serviço encontrado.</td></tr>`;
           return;
         }
 
         tabela.innerHTML = "";
-        clientes.forEach(c => {
-          const nome = c.tipoCliente === "PessoaFisica" ? c.nome : c.razaoSocial;
-          const doc = c.tipoCliente === "PessoaFisica" ? c.cpf : c.cnpj;
-
+        servicos.forEach(s => {
           const linha = `
             <tr>
-              <td>${c.id}</td>
-              <td>${c.tipoCliente}</td>
-              <td>${nome}</td>
-              <td>${doc}</td>
-              <td>${c.telefone || "-"}</td>
-              <td>${c.email || "-"}</td>
-              <td>${c.endereco?.cidade || "-"}</td>
-              <td>${c.endereco?.siglaUf || "-"}</td>
+              <td>${s.id}</td>
+              <td>${s.nomeServico}</td>
+              <td>${s.codigoDoServico}</td>
+              <td>${s.descricao}</td>
+              <td>${s.precoServico || "-"}</td>
               <td>
-                <button class="btn btn-warning btn-sm" onclick="editarCliente('${c.id}')">Editar</button>
-                <button class="btn btn-danger btn-sm" onclick="excluirCliente('${c.id}')">Excluir</button>
+                <button class="btn btn-warning btn-sm" onclick="editarServico('${s.id}')">Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="excluirServico('${s.id}')">Excluir</button>
               </td>
-
             </tr>
           `;
           tabela.innerHTML += linha;
@@ -128,13 +115,13 @@
       }
     }
 
-    async function excluirCliente(id) {
-      if (!confirm("Deseja excluir este cliente?")) return;
+    async function excluirServico(id) {
+      if (!confirm("Deseja excluir este serviço?")) return;
       try {
         const resposta = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
         if (resposta.ok) {
-          alert("Cliente excluído com sucesso!");
-          carregarClientes(); // recarrega a tabela
+          alert("Serviço excluído com sucesso!");
+          carregarServico();
         } else {
           alert("Erro ao excluir: " + resposta.statusText);
         }
@@ -143,13 +130,11 @@
       }
     }
 
-    function editarCliente(id) {
-      window.location.href = `editar_cliente.html?id=${id}`;
+    function editarServico(id) {
+      window.location.href = `editar_servico.html?id=${id}`;
     }
 
-
-    
-    document.addEventListener("DOMContentLoaded", carregarClientes);
+    document.addEventListener("DOMContentLoaded", carregarServico);
   </script>
 </body>
 </html>

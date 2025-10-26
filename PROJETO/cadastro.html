@@ -41,10 +41,10 @@
                       Menu
                     </a>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="buscar_clientes.php">Clientes</a></li>
-                      <li><a class="dropdown-item" href="listar_produtos.php">Produtos</a></li>
-                      <li><a class="dropdown-item" href="#">Serviços</a></li>
-                      <li><a class="dropdown-item" href="#">Vendas</a></li>
+                      <li><a class="dropdown-item" href="buscar_clientes.html">Clientes</a></li>
+                      <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
+                      <li><a class="dropdown-item" href="buscar_serviços.html">Serviços</a></li>
+                      <li><a class="dropdown-item active" href="vendas.html">Vendas</a></li>
                     </ul>
                   </li>
                 </ul>
@@ -202,10 +202,10 @@
         }
         else if(selectTipoCliente.value=="juridico"){
           let cnpjValido=validarCnpj(inputCnpj.value);
-          let inscricaoEstadualVazia=(inputInscricaoEstadual.value =="");
+          let inscricaoEstadualVazia=(inputInscricaoEstadual.value ==="");
           let inscricaoEstadualValidaParaEnviar=false;
           
-          if(inputInscricaoEstadualVazia){
+          if(inscricaoEstadualVazia){
             inscricaoEstadualValidaParaEnviar=true
           }
           else{
@@ -315,9 +315,6 @@
 
       function validarInscricaoEstadual(inscricaoEstadual){
         let inscricaoEstadualSomentenumeros= inscricaoEstadual.replace(/\D/g,"");
-        if(inscricaoEstadualSomentenumeros.length!=10){
-          return false;
-        }
          if(inscricaoEstadualSomentenumeros.split("").every(c=>c===inscricaoEstadualSomentenumeros[0])){
           return false;
         }
@@ -339,7 +336,7 @@
     cpf
   };
 
-  fetch("http://localhost:5105/api/cliente/fisico", {
+  fetch("https://localhost:7036/api/cliente/fisico", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dados)
@@ -370,7 +367,7 @@ function enviarDadosParaCriarUsuarioJuridicoNaApi(logradouro, numeroDoLocal, cid
     cnpj
   };
 
-  fetch("http://localhost:5105/api/cliente/juridico", {
+  fetch("https://localhost:7036/api/cliente/juridico", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dados)

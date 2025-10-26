@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Venda</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styleVendas.css">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="home.html">Home</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle mt-1" href="#" role="button" data-bs-toggle="dropdown">Menu</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="buscar_clientes.html">Clientes</a></li>
+              <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
+              <li><a class="dropdown-item" href="buscar_serviços.html">Serviços</a></li>
+              <li><a class="dropdown-item active" href="vendas.html">Vendas</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid mt-4 px-5">
+    <h2 class="text-center mb-4">Nova Venda</h2>
+
+    <!-- DADOS DA VENDA -->
+<form id="form-venda" class="mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">Nome do Cliente:</label>
+      <input type="text" id="input-nomeCliente" class="form-control" placeholder="Digite o nome do cliente">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">CPF do Cliente (opcional):</label>
+      <input type="text" id="input-cpfCliente" class="form-control" placeholder="000.000.000-00">
+      <div class="form-text"></div>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Desconto Geral (%):</label>
+      <input type="number" id="input-desconto" class="form-control" value="0" min="0" max="100">
+    </div>
+
+    <div class="col-md-3 text-end">
+      <button type="button" class="btn btn-success w-100" onclick="finalizarVenda()">💾 Finalizar Venda</button>
+    </div>
+  </div>
+
+  <!-- Campo oculto para ID do cliente -->
+  <input type="hidden" id="input-idCliente" value="">
+</form>
+
+    <hr>
+
+    <!-- PRODUTOS -->
+    <div class="section-venda mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5>Produtos</h5>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalProduto()">+ Adicionar Produto</button>
+      </div>
+      <table class="table table-striped text-center align-middle" id="tabela-produtos">
+        <thead class="table-secondary">
+          <tr>
+            <th>Produto</th>
+            <th>Código de Barra</th>
+            <th>Qtd</th>
+            <th>Preço</th>
+            <th>Desconto</th>
+            <th>Total</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- SERVIÇOS -->
+    <div class="section-venda mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5>Serviços</h5>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalServico()">+ Adicionar Serviço</button>
+      </div>
+      <table class="table table-striped text-center align-middle" id="tabela-servicos">
+        <thead class="table-secondary">
+          <tr>
+            <th>Serviço</th>
+            <th>Código</th>
+            <th>Preço</th>
+            <th>Desconto</th>
+            <th>Total</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- PAGAMENTO -->
+    <div class="section-venda mb-4">
+      <h5>Transação / Pagamento</h5>
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Tipo de Pagamento:</label>
+          <select id="tipo-pagamento" class="form-select">
+            <option value="AVista">À Vista</option>
+            <option value="APrazo">A Prazo</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Meio de Pagamento:</label>
+          <select id="meio-pagamento" class="form-select">
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="CartaoDebito">Cartão de Débito</option>
+            <option value="CartaoCredito">Cartão de Crédito</option>
+            <option value="Pix">Pix</option>
+            <option value="Boleto">Boleto</option>
+            <option value="PagamentoBancario">Transferência Bancária</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Parcelas:</label>
+          <input type="number" id="parcelas" class="form-control" value="1" min="1">
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <div class="text-end">
+      <h4>Total da Venda: R$ <span id="valor-total">0.00</span></h4>
+    </div>
+  </div>
+
+  <!-- MODAIS -->
+<div class="modal fade" id="modalProduto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <h5>Adicionar Produto</h5>
+      <div class="mb-2">
+        <label>Código de Barra ou Nome</label>
+        <input type="text" id="codigo-produto" class="form-control" placeholder="Digite código de barra ou nome">
+      </div>
+      <div class="mb-2">
+        <label>Quantidade</label>
+        <input type="number" id="qtd-produto" class="form-control" value="1" min="1">
+      </div>
+      <div class="mb-2">
+        <label>Preço Unitário (R$)</label>
+        <input type="number" id="preco-produto" class="form-control" value="0" step="0.01">
+      </div>
+      <div class="mb-2">
+        <label>Desconto Unitário (%)</label>
+        <input type="number" id="desc-produto" class="form-control" value="0" min="0" max="100">
+      </div>
+      <div class="text-end">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" onclick="adicionarProduto()">Adicionar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalServico" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <h5>Adicionar Serviço</h5>
+      <div class="mb-2">
+        <label>Código ou Nome</label>
+        <input type="text" id="codigo-servico" class="form-control" placeholder="Digite código do serviço ou nome">
+      </div>
+      <div class="mb-2">
+        <label>Preço (R$)</label>
+        <input type="number" id="preco-servico" class="form-control" value="0" step="0.01">
+      </div>
+      <div class="mb-2">
+        <label>Desconto (%)</label>
+        <input type="number" id="desc-servico" class="form-control" value="0" min="0" max="100">
+      </div>
+      <div class="text-end">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" onclick="adicionarServico()">Adicionar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let produtos = [];
+  let servicos = [];
+
+  function abrirModalProduto() {
+    new bootstrap.Modal(document.getElementById("modalProduto")).show();
+  }
+
+  function abrirModalServico() {
+    new bootstrap.Modal(document.getElementById("modalServico")).show();
+  }
+
+  // === BUSCA PRODUTO PELO CÓDIGO OU NOME ===
+  async function buscarProduto(codigoDeBarra) {
+    try {
+      // tenta buscar pelo código de barra primeiro
+      let resp = await fetch(`https://localhost:7036/api/produto/${codigoDeBarra}`);
+      if (!resp.ok) {
+        // se não achou, busca lista geral e filtra pelo nome
+        resp = await fetch("https://localhost:7036/api/produto");
+        if (!resp.ok) throw new Error("Erro ao buscar lista de produtos");
+        const lista = await resp.json();
+        const produto = lista.find(p =>
+          p.nomeProduto.toLowerCase().includes(codigoDeBarra.toLowerCase())
+        );
+        if (!produto) throw new Error("Produto não encontrado");
+        return produto;
+      }
+      return await resp.json();
+    } catch (erro) {
+      mostrarAviso(erro.message, "erro");
+      return null;
+    }
+  }
+
+  // === BUSCA SERVIÇO PELO CÓDIGO OU NOME ===
+  async function buscarServico(codigoDoServico) {
+    try {
+      // tenta buscar pelo código do serviço primeiro
+      let resp = await fetch(`https://localhost:7036/api/servico/${codigoDoServico}`);
+      if (!resp.ok) {
+        // se não achou, busca lista geral e filtra pelo nome
+        resp = await fetch("https://localhost:7036/api/servico");
+        if (!resp.ok) throw new Error("Erro ao buscar lista de serviços");
+        const lista = await resp.json();
+        const servico = lista.find(s =>
+          s.nomeServico.toLowerCase().includes(codigoDoServico.toLowerCase())
+        );
+        if (!servico) throw new Error("Serviço não encontrado");
+        return servico;
+      }
+      return await resp.json();
+    } catch (erro) {
+      mostrarAviso(erro.message, "erro");
+      return null;
+    }
+  }
+
+  // === ADICIONAR PRODUTO ===
+  async function adicionarProduto() {
+    const codigoOuNome = document.getElementById("codigo-produto").value.trim();
+    const qtd = parseInt(document.getElementById("qtd-produto").value);
+    const desc = parseFloat(document.getElementById("desc-produto").value) || 0;
+
+    if (!codigoOuNome) {
+      mostrarAviso("Informe o código de barra ou nome do produto.", "erro");
+      return;
+    }
+
+    const produto = await buscarProduto(codigoOuNome);
+    if (!produto) return;
+
+    const preco = parseFloat(produto.precoUnitario);
+    const total = qtd * preco * (1 - desc / 100);
+
+    produtos.push({
+      id: produto.id,
+      nome: produto.nomeProduto,
+      codigo: produto.codigoDeBarra,
+      qtd,
+      preco,
+      desc,
+      total
+    });
+
+    atualizarTabela();
+    bootstrap.Modal.getInstance(document.getElementById("modalProduto")).hide();
+    mostrarAviso(`Produto "${produto.nomeProduto}" adicionado à venda.`, "sucesso");
+  }
+
+  // === ADICIONAR SERVIÇO ===
+  async function adicionarServico() {
+    const codigoOuNome = document.getElementById("codigo-servico").value.trim();
+    const desc = parseFloat(document.getElementById("desc-servico").value) || 0;
+
+    if (!codigoOuNome) {
+      mostrarAviso("Informe o código ou nome do serviço.", "erro");
+      return;
+    }
+
+    const servico = await buscarServico(codigoOuNome);
+    if (!servico) return;
+
+    const preco = parseFloat(servico.precoServico);
+    const total = preco * (1 - desc / 100);
+
+    servicos.push({
+      id: servico.id,
+      nome: servico.nomeServico,
+      codigo: servico.codigoDoServico,
+      preco,
+      desc,
+      total
+    });
+
+    atualizarTabela();
+    bootstrap.Modal.getInstance(document.getElementById("modalServico")).hide();
+    mostrarAviso(`Serviço "${servico.nomeServico}" adicionado à venda.`, "sucesso");
+  }
+
+  // === REMOVER ITEM ===
+  function removerItem(tipo, index) {
+    if (tipo === "produto") produtos.splice(index, 1);
+    else servicos.splice(index, 1);
+    atualizarTabela();
+  }
+
+  // === ATUALIZAR TABELA ===
+  function atualizarTabela() {
+    const tabelaProdutos = document.querySelector("#tabela-produtos tbody");
+    const tabelaServicos = document.querySelector("#tabela-servicos tbody");
+    tabelaProdutos.innerHTML = "";
+    tabelaServicos.innerHTML = "";
+
+    produtos.forEach((p, i) => {
+      tabelaProdutos.innerHTML += `
+        <tr>
+          <td>${p.nome}</td>
+          <td>${p.codigo}</td>
+          <td>${p.qtd}</td>
+          <td>R$ ${p.preco.toFixed(2)}</td>
+          <td>${p.desc}%</td>
+          <td>R$ ${p.total.toFixed(2)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="removerItem('produto', ${i})">Excluir</button></td>
+        </tr>`;
+    });
+
+    servicos.forEach((s, i) => {
+      tabelaServicos.innerHTML += `
+        <tr>
+          <td>${s.nome}</td>
+          <td>${s.codigo}</td>
+          <td>R$ ${s.preco.toFixed(2)}</td>
+          <td>${s.desc}%</td>
+          <td>R$ ${s.total.toFixed(2)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="removerItem('servico', ${i})">Excluir</button></td>
+        </tr>`;
+    });
+
+    const totalGeral = produtos.reduce((sum, p) => sum + p.total, 0) +
+                       servicos.reduce((sum, s) => sum + s.total, 0);
+    document.getElementById("valor-total").innerText = totalGeral.toFixed(2);
+  }
+
+  // === ALERTA REUTILIZÁVEL ===
+  function mostrarAviso(mensagem, tipo) {
+    let aviso = document.createElement("div");
+    aviso.className = `alert ${tipo === "sucesso" ? "alert-success" : "alert-warning"} mt-3`;
+    aviso.textContent = mensagem;
+    document.body.appendChild(aviso);
+    setTimeout(() => aviso.remove(), 3000);
+  }
+</script>
