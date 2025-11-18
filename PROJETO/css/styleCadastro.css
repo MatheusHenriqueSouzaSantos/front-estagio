@@ -1,0 +1,69 @@
+body {
+  background-color: #f2f2f2; 
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.bg-custom {
+  background-color: #5a6f88 !important; 
+}
+
+.main{
+  max-height: 93vh;  
+}
+
+.form-box {
+  /* position: absolute; */
+  /* top: 52%;
+  left: 50%; */
+  /* transform: translate(-50%, -50%); */
+  overflow-y: auto; 
+  margin: 0 auto;
+  background: #fff;
+  padding: 2rem 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ccc;
+  width: 100%;
+  max-width: 570px;
+  z-index: 999;
+}
+
+.botao-cadastrar{
+  margin-top: 3%;
+  margin-left: 70%;
+}
+
+
+.dropdown-menu {
+  z-index: 3 !important;
+}
+/*transform*/
+.div-aviso{
+    position: fixed;
+    width: 32%;
+    height: 33vh;
+    z-index: 3 !important;
+    left: 34%;
+    top: 150%;
+    border-radius: 1rem;
+    color: white;
+    transition: top 2s ease;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.div-aviso-subir{
+   top: 28% ;
+}
+.sucesso{
+    background-color: #4caf50;
+    opacity: 0.8;
+}
+.erro{
+    background-color: #f44336;
+    opacity: 0.8;
+}

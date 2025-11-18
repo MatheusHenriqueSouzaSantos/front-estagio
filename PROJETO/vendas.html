@@ -9,6 +9,7 @@
 </head>
 <body>
   
+  
   <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
     <div class="container-fluid">
       <a class="navbar-brand" href="home.html">Home</a>
@@ -54,7 +55,10 @@
         </div>
 
         <div class="col-md-3 text-end">
-          <button type="button" class="btn btn-success w-100" onclick="finalizarVenda()">💾 Finalizar Venda</button>
+          <button type="button" class="btn btn-success w-100" onclick="finalizarVenda()">
+             💾 Finalizar Venda
+          </button>
+
         </div>
       </div>
 
@@ -64,7 +68,7 @@
 
     <hr>
 
-    
+    <!-- PRODUTOS -->
     <div class="section-venda mb-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5>Produtos</h5>
@@ -86,7 +90,7 @@
       </table>
     </div>
 
-    
+    <!-- SERVIÇOS (apenas visual por enquanto) -->
     <div class="section-venda mb-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5>Serviços</h5>
@@ -107,7 +111,7 @@
       </table>
     </div>
 
-    
+    <!-- TRANSACAO / PAGAMENTO (só layout por enquanto) -->
     <div class="section-venda mb-4">
       <h5>Transação / Pagamento</h5>
       <div class="row g-3">
@@ -142,14 +146,14 @@
     </div>
   </div>
 
-  
+  <!-- MODAL PRODUTO -->
   <div class="modal fade" id="modalProduto" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content p-3">
         <h5>Adicionar Produto</h5>
         <div class="mb-2">
-          <label>Código de Barra ou Nome</label>
-          <input type="text" id="codigo-produto" class="form-control" placeholder="Digite código de barra ou nome">
+          <label>Nome do Produto</label>
+          <input type="text" id="codigo-produto" class="form-control" placeholder="Digite parte do nome do produto">
         </div>
         <div class="mb-2">
           <label>Quantidade</label>
@@ -164,21 +168,21 @@
           <input type="number" id="desc-produto" class="form-control" value="0" min="0" max="100">
         </div>
         <div class="text-end">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
           <button class="btn btn-primary" type="button" onclick="adicionarProduto()">Adicionar</button>
         </div>
       </div>
     </div>
   </div>
 
-  
+  <!-- MODAL SERVICO (placeholder) -->
   <div class="modal fade" id="modalServico" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content p-3">
         <h5>Adicionar Serviço</h5>
         <div class="mb-2">
-          <label>Código ou Nome</label>
-          <input type="text" id="codigo-servico" class="form-control" placeholder="Digite código do serviço ou nome">
+          <label>Nome do Serviço</label>
+          <input type="text" id="codigo-servico" class="form-control" placeholder="Digite parte do nome do serviço">
         </div>
         <div class="mb-2">
           <label>Preço (R$)</label>
@@ -189,319 +193,549 @@
           <input type="number" id="desc-servico" class="form-control" value="0" min="0" max="100">
         </div>
         <div class="text-end">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
           <button class="btn btn-primary" type="button" onclick="adicionarServico()">Adicionar</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
- <script>
-  const API_BASE = "https://localhost:7036";
+  <script>
+    const API_BASE = "https://localhost:7036";
 
-  let produtos = [];
-  let servicos = [];
+    let produtos = [];
+    let servicos = []; // ainda não usamos, mas deixo preparado
 
- 
-  function mostrarAviso(mensagem, tipo) {
-    const aviso = document.createElement("div");
-    aviso.className = `alert ${tipo === "sucesso" ? "alert-success" : "alert-warning"} mt-3 position-fixed top-0 end-0 m-3`;
-    aviso.style.zIndex = "9999";
-    aviso.textContent = mensagem;
-    document.body.appendChild(aviso);
-    setTimeout(() => aviso.remove(), 4000);
-  }
+    //  UTIL 
 
-  function obterParametroUrl(nome) {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(nome);
-  }
-
-  function inicializarPaginaVenda() {
-    const idCliente = obterParametroUrl("idCliente");
-    const nome = obterParametroUrl("nome");
-    const cpf = obterParametroUrl("cpf");
-
-    if (idCliente) {
-      document.getElementById("input-idCliente").value = idCliente;
+    function mostrarAviso(mensagem, tipo) {
+      const aviso = document.createElement("div");
+      aviso.className = `alert ${tipo === "sucesso" ? "alert-success" : "alert-warning"} mt-3 position-fixed top-0 end-0 m-3`;
+      aviso.style.zIndex = "9999";
+      aviso.textContent = mensagem;
+      document.body.appendChild(aviso);
+      setTimeout(() => aviso.remove(), 4000);
     }
-    if (nome) {
-      document.getElementById("input-nomeCliente").value = nome;
+
+    function obterParametroUrl(nome) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(nome);
     }
-    if (cpf) {
-      document.getElementById("input-cpfCliente").value = cpf;
-    }
-  }
 
-  document.addEventListener("DOMContentLoaded", inicializarPaginaVenda);
+        function inicializarPaginaVenda() {
+      const idCliente = obterParametroUrl("idCliente");
+      const nome = obterParametroUrl("nome");
+      const cpf = obterParametroUrl("cpf");
 
-  
-
-  function abrirModalProduto() {
-    document.getElementById("codigo-produto").value = "";
-    document.getElementById("qtd-produto").value = 1;
-    document.getElementById("preco-produto").value = 0;
-    document.getElementById("desc-produto").value = 0;
-    new bootstrap.Modal(document.getElementById("modalProduto")).show();
-  }
-
-  function abrirModalServico() {
-    document.getElementById("codigo-servico").value = "";
-    document.getElementById("preco-servico").value = 0;
-    document.getElementById("desc-servico").value = 0;
-    new bootstrap.Modal(document.getElementById("modalServico")).show();
-  }
-
- 
-
-  
-  async function buscarProduto(codigoOuNome) {
-    try {
-      const resp = await fetch(`${API_BASE}/api/produto/${encodeURIComponent(codigoOuNome)}`);
-      if (!resp.ok) {
-        throw new Error("Produto não encontrado.");
+      if (idCliente) {
+        document.getElementById("input-idCliente").value = idCliente;
       }
-      const produto = await resp.json();
-      return produto;
-    } catch (erro) {
-      mostrarAviso(erro.message, "erro");
-      console.error(erro);
-      return null;
-    }
-  }
-
-  
-  async function buscarServico(codigoOuNome) {
-    try {
-      const resp = await fetch(`${API_BASE}/api/servico/${encodeURIComponent(codigoOuNome)}`);
-      if (!resp.ok) {
-        throw new Error("Serviço não encontrado.");
+      if (nome) {
+        document.getElementById("input-nomeCliente").value = nome;
       }
-      const servico = await resp.json();
-      return servico;
-    } catch (erro) {
-      mostrarAviso(erro.message, "erro");
-      console.error(erro);
-      return null;
-    }
-  }
+      if (cpf) {
+        document.getElementById("input-cpfCliente").value = cpf;
+      }
 
-  
-  async function adicionarProduto() {
-    const codigoOuNome = document.getElementById("codigo-produto").value.trim();
-    const qtd = parseInt(document.getElementById("qtd-produto").value, 10);
-    const desc = parseFloat(document.getElementById("desc-produto").value) || 0;
+      // <<< ADICIONE ISSO AQUI >>>
+      const inputNome = document.getElementById("input-nomeCliente");
+      const inputCpf = document.getElementById("input-cpfCliente");
 
-    if (!codigoOuNome) {
-      mostrarAviso("Informe o código de barra ou nome do produto.", "erro");
-      return;
-    }
-    if (!qtd || qtd <= 0) {
-      mostrarAviso("Quantidade inválida.", "erro");
-      return;
-    }
-
-    const produto = await buscarProduto(codigoOuNome);
-    if (!produto) return;
-
-    
-    const preco = parseFloat(produto.precoUnitario || 0);
-    const total = qtd * preco * (1 - desc / 100);
-
-    produtos.push({
-      id: produto.id,
-      nome: produto.nomeProduto,
-      codigo: produto.codigoDeBarra,
-      qtd,
-      preco,
-      desc,
-      total
-    });
-
-    atualizarTabela();
-    const modal = bootstrap.Modal.getInstance(document.getElementById("modalProduto"));
-    if (modal) modal.hide();
-    mostrarAviso(`Produto "${produto.nomeProduto}" adicionado à venda.`, "sucesso");
-  }
-
-  
-
-  async function adicionarServico() {
-    const codigoOuNome = document.getElementById("codigo-servico").value.trim();
-    const desc = parseFloat(document.getElementById("desc-servico").value) || 0;
-
-    if (!codigoOuNome) {
-      mostrarAviso("Informe o código ou nome do serviço.", "erro");
-      return;
-    }
-
-    const servico = await buscarServico(codigoOuNome);
-    if (!servico) return;
-
-    
-    const preco = parseFloat(servico.precoUnitario || 0);
-    const total = preco * (1 - desc / 100);
-
-    servicos.push({
-      id: servico.id,
-      nome: servico.nomeServico,
-      codigo: servico.codigoDoServico,
-      preco,
-      desc,
-      total
-    });
-
-    atualizarTabela();
-    const modal = bootstrap.Modal.getInstance(document.getElementById("modalServico"));
-    if (modal) modal.hide();
-    mostrarAviso(`Serviço "${servico.nomeServico}" adicionado à venda.`, "sucesso");
-  }
-
-  
-  function removerItem(tipo, index) {
-    if (tipo === "produto") {
-      produtos.splice(index, 1);
-    } else {
-      servicos.splice(index, 1);
-    }
-    atualizarTabela();
-  }
-
-  
-  function atualizarTabela() {
-    const tabelaProdutos = document.querySelector("#tabela-produtos tbody");
-    const tabelaServicos = document.querySelector("#tabela-servicos tbody");
-    tabelaProdutos.innerHTML = "";
-    tabelaServicos.innerHTML = "";
-
-    produtos.forEach((p, i) => {
-      tabelaProdutos.innerHTML += `
-        <tr>
-          <td>${p.nome}</td>
-          <td>${p.codigo}</td>
-          <td>${p.qtd}</td>
-          <td>R$ ${p.preco.toFixed(2)}</td>
-          <td>${p.desc}%</td>
-          <td>R$ ${p.total.toFixed(2)}</td>
-          <td><button class="btn btn-danger btn-sm" type="button" onclick="removerItem('produto', ${i})">Excluir</button></td>
-        </tr>`;
-    });
-
-    servicos.forEach((s, i) => {
-      tabelaServicos.innerHTML += `
-        <tr>
-          <td>${s.nome}</td>
-          <td>${s.codigo}</td>
-          <td>R$ ${s.preco.toFixed(2)}</td>
-          <td>${s.desc}%</td>
-          <td>R$ ${s.total.toFixed(2)}</td>
-          <td><button class="btn btn-danger btn-sm" type="button" onclick="removerItem('servico', ${i})">Excluir</button></td>
-        </tr>`;
-    });
-
-    const totalGeral =
-      produtos.reduce((sum, p) => sum + p.total, 0) +
-      servicos.reduce((sum, s) => sum + s.total, 0);
-
-    document.getElementById("valor-total").innerText = totalGeral.toFixed(2);
-  }
-
-  
-
-  async function finalizarVenda() {
-    const idCliente = document.getElementById("input-idCliente").value.trim();
-    const descontoGeral = parseFloat(document.getElementById("input-desconto").value) || 0;
-    const tipoPagamento = document.getElementById("tipo-pagamento").value;
-    const meioPagamento = document.getElementById("meio-pagamento").value;
-    const parcelas = parseInt(document.getElementById("parcelas").value, 10) || 1;
-
-    if (!idCliente) {
-      mostrarAviso("Selecione um cliente (IdCliente obrigatório para a venda).", "erro");
-      return;
-    }
-
-    if (produtos.length === 0 && servicos.length === 0) {
-      mostrarAviso("Adicione pelo menos um produto ou serviço à venda.", "erro");
-      return;
-    }
-
-    
-    const itensVenda = produtos.map(p => ({
-      idProduto: p.id,
-      quantidade: p.qtd,
-      descontoUnitario: p.desc || 0
-    }));
-
-    
-    const servicosVenda = servicos.map(s => ({
-      idServico: s.id,
-      descontoServico: s.desc || 0
-    }));
-
-    
-    const vendaDto = {
-      idCliente: idCliente,
-      desconto: descontoGeral,
-      itensVenda: itensVenda,
-      servicosVenda: servicosVenda
-    };
-
-    const transacaoDto = {
-      tipoPagamento: tipoPagamento,
-      meioPagamaneto: meioPagamento,
-      quantidadeDeParcelas: parcelas
-    };
-
-    
-    const payload = {
-      venda: vendaDto,
-      transacao: transacaoDto
-    };
-
-    try {
-      const resp = await fetch(`${API_BASE}/api/venda`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
+      // Quando sair do CPF, tenta buscar pelo CPF (ou nome, se CPF estiver vazio)
+      inputCpf.addEventListener("blur", () => {
+        selecionarCliente();
       });
 
-      const textoResposta = await resp.text();
-      if (!resp.ok) {
-        let msgErro = "Erro ao registrar venda.";
-        try {
-          const json = JSON.parse(textoResposta);
-          if (Array.isArray(json)) {
-            msgErro = json.join(" | ");
-          } else if (typeof json === "string") {
-            msgErro = json;
-          }
-        } catch (e) {
-          if (textoResposta) msgErro = textoResposta;
+      // Quando sair do nome, se ainda não tiver idCliente, tenta buscar
+      inputNome.addEventListener("blur", () => {
+        const hiddenId = document.getElementById("input-idCliente").value;
+        if (!hiddenId) {
+          selecionarCliente();
         }
-        throw new Error(msgErro);
-      }
+      });
 
-      let vendaCriada = null;
-      try {
-        vendaCriada = JSON.parse(textoResposta); 
-      } catch (e) {
-        // se não for JSON, ignora
-      }
+          const inputDesconto = document.getElementById("input-desconto");
+    inputDesconto.addEventListener("input", () => {
+      atualizarTabela();
+    });
 
-      mostrarAviso("Venda registrada com sucesso!", "sucesso");
-      console.log("Venda criada:", vendaCriada);
-
-      // Se quiser limpar:
-      // produtos = [];
-      // servicos = [];
-      // atualizarTabela();
-      // document.getElementById("input-desconto").value = 0;
-    } catch (erro) {
-      console.error(erro);
-      mostrarAviso(erro.message, "erro");
+      
     }
+
+  
+
+    document.addEventListener("DOMContentLoaded", inicializarPaginaVenda);
+
+    //  MODAIS 
+
+    function abrirModalProduto() {
+      document.getElementById("codigo-produto").value = "";
+      document.getElementById("qtd-produto").value = 1;
+      document.getElementById("preco-produto").value = 0;
+      document.getElementById("desc-produto").value = 0;
+      new bootstrap.Modal(document.getElementById("modalProduto")).show();
+    }
+
+    function abrirModalServico() {
+      document.getElementById("codigo-servico").value = "";
+      document.getElementById("preco-servico").value = 0;
+      document.getElementById("desc-servico").value = 0;
+      new bootstrap.Modal(document.getElementById("modalServico")).show();
+    }
+
+    // BUSCA PRODUTO POR NOME 
+     GET = "https://localhost:7036/api/produto" 
+    async function buscarProdutoPorNome(nomeDigitado) {
+      try {
+        const resp = await fetch(`${API_BASE}/api/produto`);
+        if (!resp.ok) {
+          throw new Error("Erro ao buscar lista de produtos.");
+        }
+
+        const lista = await resp.json();
+        const nomeNormalizado = nomeDigitado.trim().toLowerCase();
+
+        const encontrados = lista.filter(p =>
+          (p.nomeProduto || "").toLowerCase().includes(nomeNormalizado)
+        );
+
+        if (encontrados.length === 0) {
+          throw new Error("Nenhum produto encontrado com esse nome.");
+        }
+
+        if (encontrados.length > 1) {
+          mostrarAviso(
+            `Foram encontrados ${encontrados.length} produtos. Usando: "${encontrados[0].nomeProduto}".`,
+            "erro"
+          );
+        }
+
+        return encontrados[0]; // devolve só um produto
+      } catch (erro) {
+        mostrarAviso(erro.message, "erro");
+        console.error(erro);
+        return null;
+      }
+    }
+
+    // ADICIONAR PRODUTO 
+    async function adicionarProduto() {
+      const nomeDigitado = document.getElementById("codigo-produto").value.trim();
+      const qtd = parseInt(document.getElementById("qtd-produto").value, 10);
+      const desc = parseFloat(document.getElementById("desc-produto").value) || 0;
+
+      if (!nomeDigitado) {
+        mostrarAviso("Informe o nome do produto.", "erro");
+        return;
+      }
+      if (!qtd || qtd <= 0) {
+        mostrarAviso("Quantidade inválida.", "erro");
+        return;
+      }
+
+      const produto = await buscarProdutoPorNome(nomeDigitado);
+      if (!produto) return;
+
+      const preco = parseFloat(produto.precoUnitario || 0);
+      const total = qtd * preco * (1 - desc / 100);
+
+      produtos.push({
+        id: produto.id,
+        nome: produto.nomeProduto,
+        codigo: produto.codigoDeBarra,
+        qtd,
+        preco,
+        desc,
+        total
+      });
+
+      atualizarTabela();
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById("modalProduto"));
+      if (modal) modal.hide();
+
+      mostrarAviso(`Produto "${produto.nomeProduto}" adicionado à venda.`, "sucesso");
+    }
+
+    //  BUSCA SERVIÇO POR NOME 
+
+// GET https://localhost:7036/api/servico  → filtra por nomeServico
+async function buscarServicoPorNome(nomeDigitado) {
+  try {
+    const resp = await fetch(`${API_BASE}/api/servico`);
+    if (!resp.ok) {
+      throw new Error("Erro ao buscar lista de serviços.");
+    }
+
+    const lista = await resp.json();
+    const nomeNormalizado = nomeDigitado.trim().toLowerCase();
+
+    const encontrados = lista.filter(s =>
+      (s.nomeServico || "").toLowerCase().includes(nomeNormalizado)
+    );
+
+    if (encontrados.length === 0) {
+      throw new Error("Nenhum serviço encontrado com esse nome.");
+    }
+
+    if (encontrados.length > 1) {
+      mostrarAviso(
+        `Foram encontrados ${encontrados.length} serviços. Usando: "${encontrados[0].nomeServico}".`,
+        "erro"
+      );
+    }
+
+    return encontrados[0];
+  } catch (erro) {
+    mostrarAviso(erro.message, "erro");
+    console.error(erro);
+    return null;
   }
-</script>
+}
+
+//  ADICIONAR SERVIÇO 
+
+async function adicionarServico() {
+  const nomeDigitado = document.getElementById("codigo-servico").value.trim();
+  const desc = parseFloat(document.getElementById("desc-servico").value) || 0;
+
+  if (!nomeDigitado) {
+    mostrarAviso("Informe o nome do serviço.", "erro");
+    return;
+  }
+
+  const servico = await buscarServicoPorNome(nomeDigitado);
+  if (!servico) return;
+
+ 
+  const preco = parseFloat(servico.precoServico || 0);
+
+  const total = preco * (1 - desc / 100);
+
+  servicos.push({
+    id: servico.id,
+    nome: servico.nomeServico,
+    codigo: servico.codigoDoServico,
+    preco,
+    desc,
+    total
+  });
+
+  atualizarTabela();
+
+  const modal = bootstrap.Modal.getInstance(document.getElementById("modalServico"));
+  if (modal) modal.hide();
+
+  mostrarAviso(`Serviço "${servico.nomeServico}" adicionado à venda.`, "sucesso");
+}
+
+    //  CLIENTE: BUSCA POR NOME / CPF 
+
+    function normalizarDocumento(doc) {
+      return (doc || "").replace(/\D/g, "");
+    }
+
+    // Traz lista de clientes (tenta /api/cliente, se der ruim depois trocar para /fisico e /juridico)
+    async function buscarListaClientes() {
+      try {
+        const resp = await fetch(`${API_BASE}/api/cliente`);
+        if (!resp.ok) {
+          throw new Error("Erro ao buscar lista de clientes.");
+        }
+        const lista = await resp.json();
+        return Array.isArray(lista) ? lista : [];
+      } catch (erro) {
+        console.error(erro);
+        mostrarAviso("Erro ao buscar lista de clientes.", "erro");
+        return [];
+      }
+    }
+
+    // Busca 1 cliente a partir de nome e/ou CPF
+    async function buscarClientePorNomeOuCpf(nomeDigitado, cpfDigitado) {
+      const lista = await buscarListaClientes();
+      if (!lista.length) {
+        return null;
+      }
+
+      const cpfNormalizado = normalizarDocumento(cpfDigitado);
+      const nomeNormalizado = (nomeDigitado || "").trim().toLowerCase();
+
+      // 1) Tenta por CPF/CNPJ
+      if (cpfNormalizado) {
+        const encontradosPorDoc = lista.filter(c => {
+          const cpf = normalizarDocumento(c.cpf);
+          const cnpj = normalizarDocumento(c.cnpj);
+          return cpf === cpfNormalizado || cnpj === cpfNormalizado;
+        });
+
+        if (encontradosPorDoc.length === 1) {
+          return encontradosPorDoc[0];
+        }
+        if (encontradosPorDoc.length > 1) {
+          mostrarAviso(
+            `Foram encontrados ${encontradosPorDoc.length} clientes com esse documento. Usando o primeiro.`,
+            "erro"
+          );
+          return encontradosPorDoc[0];
+        }
+      }
+
+      // 2) Se não achou por CPF, tenta pelo nome
+      if (nomeNormalizado) {
+        const encontradosPorNome = lista.filter(c => {
+          const nome = (c.nome || c.razaoSocial || "").toLowerCase();
+          return nome.includes(nomeNormalizado);
+        });
+
+        if (encontradosPorNome.length === 0) {
+          mostrarAviso("Nenhum cliente encontrado com esse nome.", "erro");
+          return null;
+        }
+
+        if (encontradosPorNome.length > 1) {
+          mostrarAviso(
+            `Foram encontrados ${encontradosPorNome.length} clientes com esse nome. Usando: "${encontradosPorNome[0].nome || encontradosPorNome[0].razaoSocial}".`,
+            "erro"
+          );
+        }
+
+        return encontradosPorNome[0];
+      }
+
+      mostrarAviso("Digite nome ou CPF/CNPJ para buscar o cliente.", "erro");
+      return null;
+    }
+
+    // Seleciona cliente e preenche os campos da tela
+    async function selecionarCliente() {
+      const inputNome = document.getElementById("input-nomeCliente");
+      const inputCpf = document.getElementById("input-cpfCliente");
+      const hiddenId = document.getElementById("input-idCliente");
+
+      const nomeDigitado = inputNome.value;
+      const cpfDigitado = inputCpf.value;
+
+      if (!nomeDigitado && !cpfDigitado) {
+        mostrarAviso("Informe nome ou CPF/CNPJ para buscar o cliente.", "erro");
+        return;
+      }
+
+      const cliente = await buscarClientePorNomeOuCpf(nomeDigitado, cpfDigitado);
+      if (!cliente) {
+        hiddenId.value = "";
+        return;
+      }
+
+      const displayNome = cliente.nome || cliente.razaoSocial || "";
+      const doc = cliente.cpf || cliente.cnpj || "";
+
+      inputNome.value = displayNome;
+      if (doc) inputCpf.value = doc;
+      hiddenId.value = cliente.id;
+
+      mostrarAviso(`Cliente "${displayNome}" selecionado.`, "sucesso");
+    }
+
+
+    
+
+    //  REMOVER ITEM 
+
+    function removerItem(tipo, index) {
+      if (tipo === "produto") {
+        produtos.splice(index, 1);
+      } else {
+        servicos.splice(index, 1);
+      }
+      atualizarTabela();
+    }
+
+    // ATUALIZAR TABELAS / TOTAL 
+    function atualizarTabela() {
+  const tabelaProdutos = document.querySelector("#tabela-produtos tbody");
+  const tabelaServicos = document.querySelector("#tabela-servicos tbody");
+
+  tabelaProdutos.innerHTML = "";
+  tabelaServicos.innerHTML = "";
+
+  produtos.forEach((p, i) => {
+    tabelaProdutos.innerHTML += `
+      <tr>
+        <td>${p.nome}</td>
+        <td>${p.codigo || "-"}</td>
+        <td>${p.qtd}</td>
+        <td>R$ ${p.preco.toFixed(2)}</td>
+        <td>${p.desc}%</td>
+        <td>R$ ${p.total.toFixed(2)}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('produto', ${i})">
+            Excluir
+          </button>
+        </td>
+      </tr>`;
+  });
+
+  servicos.forEach((s, i) => {
+    tabelaServicos.innerHTML += `
+      <tr>
+        <td>${s.nome}</td>
+        <td>${s.codigo || "-"}</td>
+        <td>R$ ${s.preco.toFixed(2)}</td>
+        <td>${s.desc}%</td>
+        <td>R$ ${s.total.toFixed(2)}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('servico', ${i})">
+            Excluir
+          </button>
+        </td>
+      </tr>`;
+  });
+
+  
+  const subtotal =
+    produtos.reduce((sum, p) => sum + p.total, 0) +
+    servicos.reduce((sum, s) => sum + s.total, 0);
+
+  
+  const inputDesconto = document.getElementById("input-desconto");
+  const descontoPercent = parseFloat(inputDesconto.value) || 0;
+
+  
+  const descontoAjustado = Math.min(Math.max(descontoPercent, 0), 100);
+  if (descontoAjustado !== descontoPercent) {
+    inputDesconto.value = descontoAjustado; 
+  }
+
+  const fatorDesconto = descontoAjustado / 100;
+  const totalComDesconto = subtotal * (1 - fatorDesconto);
+
+  document.getElementById("valor-total").innerText = totalComDesconto.toFixed(2);
+}
+
+
+    //  FINALIZAR VENDA (POST /api/venda)
+
+    async function finalizarVenda() {
+      const idCliente = document.getElementById("input-idCliente").value.trim();
+      const descontoGeralPercent = parseFloat(document.getElementById("input-desconto").value) || 0;
+      const tipoPagamento = document.getElementById("tipo-pagamento").value;
+      const meioPagamento = document.getElementById("meio-pagamento").value;
+      let parcelas = parseInt(document.getElementById("parcelas").value, 10) || 1;
+
+      // validações básicas
+      if (!idCliente) {
+        mostrarAviso("Selecione/busque um cliente antes de finalizar a venda.", "erro");
+        return;
+      }
+
+      if (produtos.length === 0 && servicos.length === 0) {
+        mostrarAviso("Adicione pelo menos um produto ou serviço à venda.", "erro");
+        return;
+      }
+
+      // se for à vista, força 1 parcela
+      if (tipoPagamento === "AVista") {
+        parcelas = 1;
+        document.getElementById("parcelas").value = 1;
+      }
+
+      if (parcelas <= 0) {
+        mostrarAviso("A quantidade de parcelas deve ser pelo menos 1.", "erro");
+        return;
+      }
+
+      // monta ItensVenda (ItemVendaInputDto)
+      const itensVenda = produtos.map(p => ({
+        idProduto: p.id,               // Guid do produto
+        quantidade: p.qtd,
+        descontoUnitario: p.desc || 0  // aqui estamos usando % como você está usando na tela
+      }));
+
+      // monta ServicosVenda (ServicoVendaInputDto)
+      const servicosVenda = servicos.map(s => ({
+        idServico: s.id,
+        descontoServico: s.desc || 0   // também em percentual, para você tratar no backend
+      }));
+
+      // VendaInputDto
+      const vendaDto = {
+        idCliente: idCliente,
+        descontoSobreTotalVenda: descontoGeralPercent, 
+        itensVenda: itensVenda,
+        servicosVenda: servicosVenda
+      };
+
+
+      // TransacaoInputDto
+      const transacaoDto = {
+        tipoPagamento: tipoPagamento,     // "AVista" ou "APrazo"
+        meioPagamaneto: meioPagamento,    // ATENÇÃO: mesmo nome da sua enum/DTO (MeioPagamaneto)
+        quantidadeDeParcelas: parcelas
+      };
+
+      // VendaTransacaoInputDto
+      const payload = {
+        venda: vendaDto,
+        transacao: transacaoDto
+      };
+
+      console.log("JSON que está indo pro backend:");
+      console.log(JSON.stringify(payload, null, 2));
+
+
+      try {
+        const resp = await fetch(`${API_BASE}/api/venda`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const textoResposta = await resp.text();
+
+        if (!resp.ok) {
+          let msgErro = "Erro ao registrar venda.";
+          try {
+            const json = JSON.parse(textoResposta);
+            if (Array.isArray(json)) {
+              msgErro = json.join(" | ");
+            } else if (typeof json === "string") {
+              msgErro = json;
+            }
+          } catch (e) {
+            if (textoResposta) msgErro = textoResposta;
+          }
+          throw new Error(msgErro);
+        }
+
+        let vendaCriada = null;
+        try {
+          vendaCriada = JSON.parse(textoResposta); // VendaTransacaoOutputDto
+        } catch (e) {
+          // se não vier JSON estruturado, ignora
+        }
+
+        mostrarAviso("Venda registrada com sucesso!", "sucesso");
+        console.log("Venda criada:", vendaCriada);
+
+        // se quiser, limpa os itens e recalcula:
+        produtos = [];
+        servicos = [];
+        atualizarTabela();
+        // mantém cliente preenchido, só zera desconto geral:
+        document.getElementById("input-desconto").value = 0;
+      } catch (erro) {
+        console.error("Erro ao finalizar venda:", erro);
+        mostrarAviso(erro.message, "erro");
+      }
+    }
+
+
+
+  </script>
+</body>
+</html>
