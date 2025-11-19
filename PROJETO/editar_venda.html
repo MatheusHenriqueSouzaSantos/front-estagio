@@ -50,7 +50,7 @@
     </div>
   </div>
 
-  <!-- PRODUTOS -->
+ 
   <div class="card p-3 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h4>Produtos</h4>
@@ -73,7 +73,7 @@
     </table>
   </div>
 
-  <!-- SERVIÇOS -->
+  
   <div class="card p-3 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h4>Serviços</h4>
@@ -95,7 +95,7 @@
     </table>
   </div>
 
-  <!-- TRANSACAO -->
+  
   <div class="card p-3 mb-4">
     <h4>Transação</h4>
     <div class="row g-3">
@@ -126,7 +126,7 @@
     </div>
   </div>
 
-  <!-- TOTAL -->
+  
   <h3 class="text-end">Total: R$ <span id="span-total">0.00</span></h3>
 
   <div class="text-end mt-3">
@@ -144,9 +144,7 @@ let itens = [];
 let servs = [];
 let vendaAtual = null;
 
-// =======================================================
-// BUSCAR VENDA PELO ID
-// =======================================================
+
 async function carregarVenda() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get("id");
@@ -165,15 +163,15 @@ function preencherVenda(v) {
   const cliente = venda.cliente || {};
   const transacao = v.transacao || {};
 
-  // Cliente
+  
   document.getElementById("input-cliente").value =
     cliente.nome || cliente.razaoSocial || "";
 
-  // Desconto geral – tenta os dois nomes que podem vir do backend
+  
   const descontoGeral = venda.descontoSobreTotalVenda ?? venda.desconto ?? 0;
   document.getElementById("input-desconto-geral").value = descontoGeral;
 
-  // Produtos (não guardo mais total aqui)
+  
   itens = (venda.itensVenda || []).map(x => {
     const produto = x.produto || {};
     return {
@@ -186,7 +184,7 @@ function preencherVenda(v) {
     };
   });
 
-  // Serviços (também sem total pronto)
+  
   servs = (venda.servicosVenda || []).map(x => {
     const servico = x.servico || {};
     return {
@@ -198,7 +196,7 @@ function preencherVenda(v) {
     };
   });
 
-  // Transação
+ 
   document.getElementById("input-tipo-pagamento").value =
     transacao.tipoPagamento || "AVista";
 
@@ -217,9 +215,7 @@ function preencherVenda(v) {
 }
 
 
-// =======================================================
-// ATUALIZAR TABELAS
-// =======================================================
+
 function atualizarTabela() {
   const tbp = document.querySelector("#tabela-produtos tbody");
   const tbs = document.querySelector("#tabela-servicos tbody");
@@ -286,9 +282,7 @@ function removerItem(tipo, idx) {
   atualizarTabela();
 }
 
-// =======================================================
-// SALVAR ALTERAÇÕES
-// =======================================================
+
 async function salvarAlteracoes() {
   const id = vendaAtual.venda.idVenda;
 
@@ -323,9 +317,7 @@ async function salvarAlteracoes() {
   alert("Venda atualizada!");
 }
 
-// =======================================================
-// EXCLUIR
-// =======================================================
+
 async function excluirVenda() {
   if (!confirm("Tem certeza que deseja excluir esta venda?")) return;
 
@@ -339,7 +331,7 @@ async function excluirVenda() {
   window.location.href = "buscar_vendas.html";
 }
 
-// =======================================================
+
 document.addEventListener("DOMContentLoaded", carregarVenda);
 </script>
 
