@@ -42,7 +42,7 @@
       <h2>Detalhes da Venda</h2>
       <div>
         <a href="buscar_vendas.html" class="btn btn-secondary me-2">Voltar</a>
-        <button class="btn btn-primary me-2" type="button" onclick="editarVenda()">Editar</button>
+        <button class="btn btn-primary me-2" type="button" id="btn-editar" onclick="editarVenda()">Editar</button>
         <button class="btn btn-danger" type="button" id="btn-excluir" onclick="excluirVenda()">Excluir</button>
         <button class="btn btn-primary me-2" type="button"  onclick="irParaPagamento()"> Pagar Parcelas </button>
 </button>
@@ -268,10 +268,15 @@
 
         // DESATIVA EXCLUIR SE A VENDA ESTIVER PAGA
         const btnExcluir = document.getElementById("btn-excluir");
+        const btnEditar = document.getElementById("btn-editar");
 
-        if (transacao.pago === true) {
+        if (transacao.numeroDeParcelasPagas > 0) {
+
             btnExcluir.disabled = true;
             btnExcluir.title = "Venda paga não pode ser excluída.";
+
+            btnEditar.disabled = true;
+            btnEditar.title = "Venda paga não pode ser editada.";
         }
         }
 

@@ -211,8 +211,9 @@
   const inputQtd = document.getElementById("input-qtd-parcelas");
   const qtd = Number(inputQtd.value);
 
+  
   if (!qtd || qtd <= 0) {
-    mostrarAviso("Informe uma quantidade de parcelas válida.", "erro");
+    mostrarAviso("Informe uma quantidade válida de parcelas.", "erro");
     return;
   }
 
@@ -221,18 +222,13 @@
     return;
   }
 
- 
+  
   const payload = {
-    
-    QuantidadeDeParcelasPagasASerAtualizadaParaPaga: qtd,
-
-    
-    quantidadeDeParcelasPagasASerAtualizadaParaPaga: qtd,
-    QuantidadeDeParcelasPagas: qtd,
-    quantidadeDeParcelasPagas: qtd
+    QuantidadeDeParcelasASerAtualizadaParaPaga: qtd,
+    quantidadeDeParcelasASerAtualizadaParaPaga: qtd 
   };
 
-  console.log("Enviando para PATCH:", payload);
+  console.log("📤 Enviando PATCH com payload:", payload);
 
   try {
     const resp = await fetch(`${API_VENDA}/${encodeURIComponent(transacaoAtual.idTransacao)}`, {
@@ -242,8 +238,10 @@
     });
 
     const texto = await resp.text();
+
     if (!resp.ok) {
       let msg = "Erro ao registrar pagamento.";
+
       try {
         const json = JSON.parse(texto);
         if (Array.isArray(json)) msg = json.join(" | ");
@@ -251,13 +249,17 @@
       } catch {
         if (texto) msg = texto;
       }
+
       throw new Error(msg);
     }
 
     mostrarAviso("Pagamento registrado com sucesso!", "sucesso");
-    await carregarVenda(); 
+
+   
+    await carregarVenda();
+
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro no pagamento:", erro);
     mostrarAviso(erro.message, "erro");
   }
 }
