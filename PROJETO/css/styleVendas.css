@@ -29,3 +29,27 @@ h2, h5 {
   color: #198754;
   font-weight: bold;
 }
+
+.botao-add {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background-color: #188754; /* verde Bootstrap (success) */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 32px;
+  text-decoration: none;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 9999;
+}
+
+.botao-add:hover {
+  transform: scale(1.1);
+  box-shadow: 0px 6px 16px rgba(0,0,0,0.3);
+}

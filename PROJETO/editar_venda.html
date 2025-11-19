@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Venda</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="home.html">Home</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle mt-1" role="button" data-bs-toggle="dropdown">Menu</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="buscar_clientes.html">Clientes</a></li>
+            <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
+            <li><a class="dropdown-item" href="buscar_servicos.html">Serviços</a></li>
+            <li><a class="dropdown-item" href="buscar_vendas.html">Vendas</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+
+  <h2 class="text-center mb-4">Editar Venda</h2>
+
+  <div id="sec-geral" class="card p-3 mb-4">
+    <h4>Informações Gerais</h4>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Cliente:</label>
+        <input id="input-cliente" class="form-control" disabled>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Desconto Geral (%):</label>
+        <input id="input-desconto-geral" type="number" class="form-control" min="0" value="0">
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUTOS -->
+  <div class="card p-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h4>Produtos</h4>
+      <button class="btn btn-primary btn-sm" onclick="abrirModalProduto()">+ Produto</button>
+    </div>
+
+    <table class="table table-striped text-center" id="tabela-produtos">
+      <thead class="table-secondary">
+        <tr>
+          <th>Nome</th>
+          <th>Código</th>
+          <th>Qtd</th>
+          <th>Preço</th>
+          <th>Desconto</th>
+          <th>Total</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- SERVIÇOS -->
+  <div class="card p-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h4>Serviços</h4>
+      <button class="btn btn-primary btn-sm" onclick="abrirModalServico()">+ Serviço</button>
+    </div>
+
+    <table class="table table-striped text-center" id="tabela-servicos">
+      <thead class="table-secondary">
+        <tr>
+          <th>Nome</th>
+          <th>Código</th>
+          <th>Preço</th>
+          <th>Desconto</th>
+          <th>Total</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- TRANSACAO -->
+  <div class="card p-3 mb-4">
+    <h4>Transação</h4>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Tipo:</label>
+        <select id="input-tipo-pagamento" class="form-select">
+          <option value="AVista">À Vista</option>
+          <option value="APrazo">A Prazo</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Meio:</label>
+        <select id="input-meio" class="form-select">
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="CartaoDebito">Cartão Débito</option>
+          <option value="CartaoCredito">Cartão Crédito</option>
+          <option value="Pix">Pix</option>
+          <option value="Boleto">Boleto</option>
+          <option value="PagamentoBancario">Transferência</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Parcelas:</label>
+        <input id="input-parcelas" type="number" min="1" class="form-control">
+      </div>
+    </div>
+  </div>
+
+  <!-- TOTAL -->
+  <h3 class="text-end">Total: R$ <span id="span-total">0.00</span></h3>
+
+  <div class="text-end mt-3">
+    <button class="btn btn-danger" id="btn-excluir" onclick="excluirVenda()">Excluir</button>
+    <button class="btn btn-secondary" onclick="history.back()">Cancelar</button>
+    <button class="btn btn-success" onclick="salvarAlteracoes()">Salvar Alterações</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = "https://localhost:7036/api";
+let itens = [];
+let servs = [];
+let vendaAtual = null;
+
+// =======================================================
+// BUSCAR VENDA PELO ID
+// =======================================================
+async function carregarVenda() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  if (!id) return alert("ID inválido.");
+
+  const resp = await fetch(`${API}/venda/${id}`);
+  const data = await resp.json();
+
+  vendaAtual = data;
+
+  preencherVenda(data);
+}
+
+function preencherVenda(v) {
+  const venda = v.venda || {};
+  const cliente = venda.cliente || {};
+  const transacao = v.transacao || {};
+
+  // Cliente
+  document.getElementById("input-cliente").value =
+    cliente.nome || cliente.razaoSocial || "";
+
+  // Desconto geral – tenta os dois nomes que podem vir do backend
+  const descontoGeral = venda.descontoSobreTotalVenda ?? venda.desconto ?? 0;
+  document.getElementById("input-desconto-geral").value = descontoGeral;
+
+  // Produtos (não guardo mais total aqui)
+  itens = (venda.itensVenda || []).map(x => {
+    const produto = x.produto || {};
+    return {
+      id: produto.id,
+      nome: produto.nomeProduto,
+      codigo: produto.codigoDeBarra,
+      qtd: x.quantidade ?? 0,
+      preco: produto.precoUnitario ?? 0,
+      desc: x.descontoUnitario ?? 0   // percentual
+    };
+  });
+
+  // Serviços (também sem total pronto)
+  servs = (venda.servicosVenda || []).map(x => {
+    const servico = x.servico || {};
+    return {
+      id: servico.id,
+      nome: servico.nomeServico,
+      codigo: servico.codigoDoServico,
+      preco: (servico.precoUnitario ?? servico.precoServico ?? 0),
+      desc: x.descontoServico ?? 0    // percentual
+    };
+  });
+
+  // Transação
+  document.getElementById("input-tipo-pagamento").value =
+    transacao.tipoPagamento || "AVista";
+
+  document.getElementById("input-meio").value =
+    transacao.meioPagamento || "Dinheiro";
+
+  document.getElementById("input-parcelas").value =
+    transacao.numeroDeParcelas ?? 1;
+
+  atualizarTabela();
+
+  // Desativa excluir se já estiver paga
+  if (transacao.pago === true) {
+    document.getElementById("btn-excluir").disabled = true;
+  }
+}
+
+
+// =======================================================
+// ATUALIZAR TABELAS
+// =======================================================
+function atualizarTabela() {
+  const tbp = document.querySelector("#tabela-produtos tbody");
+  const tbs = document.querySelector("#tabela-servicos tbody");
+
+  tbp.innerHTML = "";
+  tbs.innerHTML = "";
+
+  let totalGeral = 0;
+
+  itens.forEach((p, i) => {
+    const preco = Number(p.preco) || 0;
+    const qtd = Number(p.qtd) || 0;
+    const desc = Number(p.desc) || 0;
+
+    const totalItem = preco * qtd * (1 - desc / 100);
+    totalGeral += totalItem;
+
+    tbp.innerHTML += `
+      <tr>
+        <td>${p.nome}</td>
+        <td>${p.codigo}</td>
+        <td>${qtd}</td>
+        <td>R$ ${preco.toFixed(2)}</td>
+        <td>${desc}%</td>
+        <td>R$ ${totalItem.toFixed(2)}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="removerItem('p', ${i})">
+            Remover
+          </button>
+        </td>
+      </tr>`;
+  });
+
+  servs.forEach((s, i) => {
+    const preco = Number(s.preco) || 0;
+    const desc = Number(s.desc) || 0;
+
+    const totalServ = preco * (1 - desc / 100);
+    totalGeral += totalServ;
+
+    tbs.innerHTML += `
+      <tr>
+        <td>${s.nome}</td>
+        <td>${s.codigo}</td>
+        <td>R$ ${preco.toFixed(2)}</td>
+        <td>${desc}%</td>
+        <td>R$ ${totalServ.toFixed(2)}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="removerItem('s', ${i})">
+            Remover
+          </button>
+        </td>
+      </tr>`;
+  });
+
+  document.getElementById("span-total").innerText = totalGeral.toFixed(2);
+}
+
+
+function removerItem(tipo, idx) {
+  if (tipo === 'p') itens.splice(idx, 1);
+  else servs.splice(idx, 1);
+
+  atualizarTabela();
+}
+
+// =======================================================
+// SALVAR ALTERAÇÕES
+// =======================================================
+async function salvarAlteracoes() {
+  const id = vendaAtual.venda.idVenda;
+
+  const dto = {
+    venda: {
+      idCliente: vendaAtual.venda.cliente.id,
+      desconto: Number(document.getElementById("input-desconto-geral").value),
+      itensVenda: itens.map(x => ({
+        idProduto: x.id,
+        quantidade: x.qtd,
+        descontoUnitario: x.desc
+      })),
+      servicosVenda: servs.map(x => ({
+        idServico: x.id,
+        descontoServico: x.desc
+      }))
+    },
+    transacao: {
+      tipoPagamento: document.getElementById("input-tipo-pagamento").value,
+      meioPagamaneto: document.getElementById("input-meio").value,
+      quantidadeDeParcelas: Number(document.getElementById("input-parcelas").value)
+    }
+  };
+
+  const resp = await fetch(`${API}/venda/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dto)
+  });
+
+  if (!resp.ok) return alert("Erro ao salvar.");
+  alert("Venda atualizada!");
+}
+
+// =======================================================
+// EXCLUIR
+// =======================================================
+async function excluirVenda() {
+  if (!confirm("Tem certeza que deseja excluir esta venda?")) return;
+
+  const id = vendaAtual.venda.idVenda;
+
+  const resp = await fetch(`${API}/venda/${id}`, { method: "DELETE" });
+
+  if (!resp.ok) return alert("Erro ao excluir.");
+
+  alert("Venda excluída.");
+  window.location.href = "buscar_vendas.html";
+}
+
+// =======================================================
+document.addEventListener("DOMContentLoaded", carregarVenda);
+</script>
+
+</body>
+</html>
