@@ -6,11 +6,9 @@
   <title>Lista de Vendas</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Se quiser, faça um CSS parecido com o de clientes -->
   <link rel="stylesheet" href="css/styleVendas.css">
 </head>
 <body>
-  <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
     <div class="container-fluid">
       <a class="navbar-brand" href="home.html">Home</a>
@@ -30,6 +28,7 @@
               <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
               <li><a class="dropdown-item" href="buscar_serviços.html">Serviços</a></li>
               <li><a class="dropdown-item active" href="buscar_vendas.html">Vendas</a></li>
+              <li><a class="dropdown-item " href="relatorios.html">Relatórios</a></li>
             </ul>
           </li>
         </ul>
@@ -37,7 +36,7 @@
     </div>
   </nav>
 
-  <!-- CONTEÚDO -->
+ 
   <div class="container my-5">
     <div class="card shadow-sm">
       <div class="card-body">
@@ -47,7 +46,7 @@
           <table class="table table-striped text-center align-middle" id="tabela-vendas">
             <thead class="table-secondary">
               <tr>
-                <th>ID Venda</th>
+                <th>Código da Venda</th>
                 <th>Cliente</th>
                 <th>Total da Venda (R$)</th>
                 <th>Total Pago (R$)</th>
@@ -56,7 +55,7 @@
               </tr>
             </thead>
             <tbody>
-              <!-- preenchido via JS -->
+              
             </tbody>
           </table>
         </div>
@@ -69,7 +68,7 @@
     </a>
 
 
-  <!-- BOOTSTRAP -->
+  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
@@ -108,13 +107,15 @@
       }
 
       vendasTransacoes.forEach(vt => {
-        // Estrutura: { venda: VendaOutputDto, transacao: TransacaoOutputDto }
         const venda = vt.venda || {};
         const transacao = vt.transacao || {};
 
         const idVenda = venda.idVenda || "";
+
+        const codigoVenda = venda.codigoVenda ?? "-";
+
         const nomeCliente = obterNomeCliente(venda.cliente);
-        const totalVenda = venda.valorTotalComDescontoAplicado ?? 0;
+        const totalVenda = venda.valorTotalComDesconto ?? 0;
         const totalPago = transacao.valorPago ?? 0;
         const situacao = obterSituacao(transacao);
 
@@ -122,7 +123,7 @@
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${idVenda}</td>
+          <td>${codigoVenda}</td>
           <td>${nomeCliente}</td>
           <td>R$ ${totalVenda.toFixed(2)}</td>
           <td>R$ ${totalPago.toFixed(2)}</td>

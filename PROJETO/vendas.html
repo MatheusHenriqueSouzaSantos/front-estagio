@@ -24,7 +24,8 @@
               <li><a class="dropdown-item" href="buscar_clientes.html">Clientes</a></li>
               <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
               <li><a class="dropdown-item" href="buscar_serviços.html">Serviços</a></li>
-              <li><a class="dropdown-item active" href="vendas.html">Vendas</a></li>
+              <li><a class="dropdown-item active" href="buscar_vendas.html">Vendas</a></li>
+              <li><a class="dropdown-item" href="relatorios.html">Relatórios</a></li>
             </ul>
           </li>
         </ul>
@@ -35,7 +36,6 @@
   <div class="container-fluid mt-4 px-5">
     <h2 class="text-center mb-4">Nova Venda</h2>
 
-    
     <form id="form-venda" class="mb-4">
       <div class="row g-3 align-items-end">
         <div class="col-md-4">
@@ -50,8 +50,14 @@
         </div>
 
         <div class="col-md-2">
-          <label class="form-label">Desconto Geral (%):</label>
-          <input type="number" id="input-desconto" class="form-control" value="0" min="0" max="100">
+          <label class="form-label">Desconto Geral (R$):</label>
+          <input
+            type="number"
+            id="input-desconto"
+            class="form-control"
+            value="0"
+            min="0"
+            step="0.01">
         </div>
 
         <div class="col-md-3 text-end">
@@ -62,13 +68,11 @@
         </div>
       </div>
 
-      
       <input type="hidden" id="input-idCliente" value="">
     </form>
 
     <hr>
 
-    
     <div class="section-venda mb-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5>Produtos</h5>
@@ -90,7 +94,6 @@
       </table>
     </div>
 
-   
     <div class="section-venda mb-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5>Serviços</h5>
@@ -111,26 +114,25 @@
       </table>
     </div>
 
-    
     <div class="section-venda mb-4">
       <h5>Transação / Pagamento</h5>
       <div class="row g-3">
         <div class="col-md-3">
           <label class="form-label">Tipo de Pagamento:</label>
           <select id="tipo-pagamento" class="form-select">
-            <option value="AVista">À Vista</option>
-            <option value="APrazo">A Prazo</option>
+            <option value="0">À Vista</option>
+            <option value="1">A Prazo</option>
           </select>
         </div>
         <div class="col-md-3">
           <label class="form-label">Meio de Pagamento:</label>
           <select id="meio-pagamento" class="form-select">
-            <option value="Dinheiro">Dinheiro</option>
-            <option value="CartaoDebito">Cartão de Débito</option>
-            <option value="CartaoCredito">Cartão de Crédito</option>
-            <option value="Pix">Pix</option>
-            <option value="Boleto">Boleto</option>
-            <option value="PagamentoBancario">Transferência Bancária</option>
+            <option value="0">Dinheiro</option>
+            <option value="1">Cartão de Débito</option>
+            <option value="2">Cartão de Crédito</option>
+            <option value="3">Pix</option>
+            <option value="4">Boleto</option>
+            <option value="5">Transferência Bancária</option>
           </select>
         </div>
         <div class="col-md-3">
@@ -146,69 +148,105 @@
     </div>
   </div>
 
-  
   <div class="modal fade" id="modalProduto" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content p-3">
-        <h5>Adicionar Produto</h5>
+        <h5 class="mb-3">Adicionar Produto</h5>
+
         <div class="mb-2">
-          <label>Nome do Produto</label>
-          <input type="text" id="codigo-produto" class="form-control" placeholder="Digite parte do nome do produto">
+          <label class="form-label">Nome do Produto</label>
+          <div class="input-group">
+            <input type="text" id="mp-busca" class="form-control" placeholder="Digite parte do nome">
+            <button class="btn btn-outline-secondary" type="button" onclick="buscarProdutoModal()">Buscar</button>
+          </div>
         </div>
+
+        <input type="hidden" id="mp-id-produto">
+
         <div class="mb-2">
-          <label>Quantidade</label>
-          <input type="number" id="qtd-produto" class="form-control" value="1" min="1">
+          <label class="form-label">Nome</label>
+          <input type="text" id="mp-nome" class="form-control" readonly>
         </div>
+
         <div class="mb-2">
-          <label>Preço Unitário (R$)</label>
-          <input type="number" id="preco-produto" class="form-control" value="0" step="0.01" disabled>
+          <label class="form-label">Código</label>
+          <input type="text" id="mp-codigo" class="form-control" readonly>
         </div>
+
         <div class="mb-2">
-          <label>Desconto Unitário (%)</label>
-          <input type="number" id="desc-produto" class="form-control" value="0" min="0" max="100">
+          <label class="form-label">Quantidade</label>
+          <input type="number" id="mp-qtd" class="form-control" value="1" min="1">
         </div>
-        <div class="text-end">
-          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
-          <button class="btn btn-primary" type="button" onclick="adicionarProduto()">Adicionar</button>
+
+        <div class="mb-2">
+          <label class="form-label">Preço Unitário (R$)</label>
+          <input type="number" id="mp-preco" class="form-control" min="0" step="0.01" readonly>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Desconto Unitário (%)</label>
+          <input type="number" id="mp-desc" class="form-control" min="0" value="0">
+        </div>
+
+        <div class="text-end mt-3">
+          <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary btn-sm" onclick="confirmarProduto()">Adicionar</button>
         </div>
       </div>
     </div>
   </div>
 
-  
   <div class="modal fade" id="modalServico" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content p-3">
-        <h5>Adicionar Serviço</h5>
+        <h5 class="mb-3">Adicionar Serviço</h5>
+
         <div class="mb-2">
-          <label>Nome do Serviço</label>
-          <input type="text" id="codigo-servico" class="form-control" placeholder="Digite parte do nome do serviço">
+          <label class="form-label">Nome do Serviço</label>
+          <div class="input-group">
+            <input type="text" id="ms-busca" class="form-control" placeholder="Digite parte do nome">
+            <button class="btn btn-outline-secondary" type="button" onclick="buscarServicoModal()">Buscar</button>
+          </div>
         </div>
+
+        <input type="hidden" id="ms-id-servico">
+
         <div class="mb-2">
-          <label>Preço (R$)</label>
-          <input type="number" id="preco-servico" class="form-control" value="0" step="0.01" disabled>
+          <label class="form-label">Nome</label>
+          <input type="text" id="ms-nome" class="form-control" readonly>
         </div>
+
         <div class="mb-2">
-          <label>Desconto (%)</label>
-          <input type="number" id="desc-servico" class="form-control" value="0" min="0" max="100">
+          <label class="form-label">Código</label>
+          <input type="text" id="ms-codigo" class="form-control" readonly>
         </div>
-        <div class="text-end">
-          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
-          <button class="btn btn-primary" type="button" onclick="adicionarServico()">Adicionar</button>
+
+        <div class="mb-2">
+          <label class="form-label">Preço (R$)</label>
+          <input type="number" id="ms-preco" class="form-control" min="0" step="0.01" readonly>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Desconto (%)</label>
+          <input type="number" id="ms-desc" class="form-control" min="0" value="0">
+        </div>
+
+        <div class="text-end mt-3">
+          <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary btn-sm" onclick="confirmarServico()">Adicionar</button>
         </div>
       </div>
     </div>
   </div>
 
- 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const API_BASE = "https://localhost:7036";
 
     let produtos = [];
-    let servicos = []; 
-
-    
+    let servicos = [];
+    let modalProduto;
+    let modalServico;
 
     function mostrarAviso(mensagem, tipo) {
       const aviso = document.createElement("div");
@@ -224,7 +262,7 @@
       return params.get(nome);
     }
 
-        function inicializarPaginaVenda() {
+    function inicializarPaginaVenda() {
       const idCliente = obterParametroUrl("idCliente");
       const nome = obterParametroUrl("nome");
       const cpf = obterParametroUrl("cpf");
@@ -239,16 +277,13 @@
         document.getElementById("input-cpfCliente").value = cpf;
       }
 
-      
       const inputNome = document.getElementById("input-nomeCliente");
       const inputCpf = document.getElementById("input-cpfCliente");
 
-      
       inputCpf.addEventListener("blur", () => {
         selecionarCliente();
       });
 
-     
       inputNome.addEventListener("blur", () => {
         const hiddenId = document.getElementById("input-idCliente").value;
         if (!hiddenId) {
@@ -256,37 +291,29 @@
         }
       });
 
-          const inputDesconto = document.getElementById("input-desconto");
-    inputDesconto.addEventListener("input", () => {
-      atualizarTabela();
-    });
+      const inputDesconto = document.getElementById("input-desconto");
+      inputDesconto.addEventListener("input", () => {
+        atualizarTabela();
+      });
 
-      
+      modalProduto = new bootstrap.Modal(document.getElementById("modalProduto"));
+      modalServico = new bootstrap.Modal(document.getElementById("modalServico"));
     }
-
-  
 
     document.addEventListener("DOMContentLoaded", inicializarPaginaVenda);
 
-    
-
     function abrirModalProduto() {
-      document.getElementById("codigo-produto").value = "";
-      document.getElementById("qtd-produto").value = 1;
-      document.getElementById("preco-produto").value = 0;
-      document.getElementById("desc-produto").value = 0;
-      new bootstrap.Modal(document.getElementById("modalProduto")).show();
+      document.getElementById("mp-busca").value = "";
+      document.getElementById("mp-id-produto").value = "";
+      document.getElementById("mp-nome").value = "";
+      document.getElementById("mp-codigo").value = "";
+      document.getElementById("mp-qtd").value = 1;
+      document.getElementById("mp-preco").value = "";
+      document.getElementById("mp-desc").value = 0;
+
+      modalProduto.show();
     }
 
-    function abrirModalServico() {
-      document.getElementById("codigo-servico").value = "";
-      document.getElementById("preco-servico").value = 0;
-      document.getElementById("desc-servico").value = 0;
-      new bootstrap.Modal(document.getElementById("modalServico")).show();
-    }
-
-    // BUSCA PRODUTO POR NOME 
-     GET = "https://localhost:7036/api/produto" 
     async function buscarProdutoPorNome(nomeDigitado) {
       try {
         const resp = await fetch(`${API_BASE}/api/produto`);
@@ -312,7 +339,7 @@
           );
         }
 
-        return encontrados[0]; // devolve só um produto
+        return encontrados[0];
       } catch (erro) {
         mostrarAviso(erro.message, "erro");
         console.error(erro);
@@ -320,31 +347,48 @@
       }
     }
 
-    // ADICIONAR PRODUTO 
-    async function adicionarProduto() {
-      const nomeDigitado = document.getElementById("codigo-produto").value.trim();
-      const qtd = parseInt(document.getElementById("qtd-produto").value, 10);
-      const desc = parseFloat(document.getElementById("desc-produto").value) || 0;
+    async function buscarProdutoModal() {
+      const nomeDigitado = document.getElementById("mp-busca").value.trim();
 
       if (!nomeDigitado) {
-        mostrarAviso("Informe o nome do produto.", "erro");
-        return;
-      }
-      if (!qtd || qtd <= 0) {
-        mostrarAviso("Quantidade inválida.", "erro");
+        mostrarAviso("Informe parte do nome do produto.", "erro");
         return;
       }
 
       const produto = await buscarProdutoPorNome(nomeDigitado);
       if (!produto) return;
 
-      const preco = parseFloat(produto.precoUnitario || 0);
+      document.getElementById("mp-id-produto").value = produto.id;
+      document.getElementById("mp-nome").value = produto.nomeProduto;
+      document.getElementById("mp-codigo").value = produto.codigoDeBarra ?? "";
+      document.getElementById("mp-preco").value = (produto.precoUnitario || 0).toFixed(2);
+    }
+
+    function confirmarProduto() {
+      const id = document.getElementById("mp-id-produto").value;
+
+      if (!id) {
+        mostrarAviso("Busque e selecione um produto primeiro.", "erro");
+        return;
+      }
+
+      const nome   = document.getElementById("mp-nome").value;
+      const codigo = document.getElementById("mp-codigo").value;
+      const qtd    = parseInt(document.getElementById("mp-qtd").value, 10) || 0;
+      const preco  = parseFloat(document.getElementById("mp-preco").value) || 0;
+      const desc   = parseFloat(document.getElementById("mp-desc").value) || 0;
+
+      if (qtd <= 0) {
+        mostrarAviso("Quantidade inválida.", "erro");
+        return;
+      }
+
       const total = qtd * preco * (1 - desc / 100);
 
       produtos.push({
-        id: produto.id,
-        nome: produto.nomeProduto,
-        codigo: produto.codigoDeBarra,
+        id,
+        nome,
+        codigo,
         qtd,
         preco,
         desc,
@@ -353,91 +397,110 @@
 
       atualizarTabela();
 
-      const modal = bootstrap.Modal.getInstance(document.getElementById("modalProduto"));
-      if (modal) modal.hide();
+      if (modalProduto) modalProduto.hide();
 
-      mostrarAviso(`Produto "${produto.nomeProduto}" adicionado à venda.`, "sucesso");
+      mostrarAviso(`Produto "${nome}" adicionado à venda.`, "sucesso");
     }
-
-    //  BUSCA SERVIÇO POR NOME 
-
-GET = "https://localhost:7036/api/servico" 
-async function buscarServicoPorNome(nomeDigitado) {
-  try {
-    const resp = await fetch(`${API_BASE}/api/servico`);
-    if (!resp.ok) {
-      throw new Error("Erro ao buscar lista de serviços.");
-    }
-
-    const lista = await resp.json();
-    const nomeNormalizado = nomeDigitado.trim().toLowerCase();
-
-    const encontrados = lista.filter(s =>
-      (s.nomeServico || "").toLowerCase().includes(nomeNormalizado)
-    );
-
-    if (encontrados.length === 0) {
-      throw new Error("Nenhum serviço encontrado com esse nome.");
-    }
-
-    if (encontrados.length > 1) {
-      mostrarAviso(
-        `Foram encontrados ${encontrados.length} serviços. Usando: "${encontrados[0].nomeServico}".`,
-        "erro"
-      );
-    }
-
-    return encontrados[0];
-  } catch (erro) {
-    mostrarAviso(erro.message, "erro");
-    console.error(erro);
-    return null;
-  }
-}
-
-//  ADICIONAR SERVIÇO 
-
-async function adicionarServico() {
-  const nomeDigitado = document.getElementById("codigo-servico").value.trim();
-  const desc = parseFloat(document.getElementById("desc-servico").value) || 0;
-
-  if (!nomeDigitado) {
-    mostrarAviso("Informe o nome do serviço.", "erro");
-    return;
-  }
-
-  const servico = await buscarServicoPorNome(nomeDigitado);
-  if (!servico) return;
-
- 
-  const preco = parseFloat(servico.precoServico || 0);
-
-  const total = preco * (1 - desc / 100);
-
-  servicos.push({
-    id: servico.id,
-    nome: servico.nomeServico,
-    codigo: servico.codigoDoServico,
-    preco,
-    desc,
-    total
-  });
-
-  atualizarTabela();
-
-  const modal = bootstrap.Modal.getInstance(document.getElementById("modalServico"));
-  if (modal) modal.hide();
-
-  mostrarAviso(`Serviço "${servico.nomeServico}" adicionado à venda.`, "sucesso");
-}
 
     
+    function abrirModalServico() {
+      document.getElementById("ms-busca").value = "";
+      document.getElementById("ms-id-servico").value = "";
+      document.getElementById("ms-nome").value = "";
+      document.getElementById("ms-codigo").value = "";
+      document.getElementById("ms-preco").value = "";
+      document.getElementById("ms-desc").value = 0;
+
+      modalServico.show();
+    }
+
+    async function buscarServicoPorNome(nomeDigitado) {
+      try {
+        const resp = await fetch(`${API_BASE}/api/servico`);
+        if (!resp.ok) {
+          throw new Error("Erro ao buscar lista de serviços.");
+        }
+
+        const lista = await resp.json();
+        const nomeNormalizado = nomeDigitado.trim().toLowerCase();
+
+        const encontrados = lista.filter(s =>
+          (s.nomeServico || "").toLowerCase().includes(nomeNormalizado)
+        );
+
+        if (encontrados.length === 0) {
+          throw new Error("Nenhum serviço encontrado com esse nome.");
+        }
+
+        if (encontrados.length > 1) {
+          mostrarAviso(
+            `Foram encontrados ${encontrados.length} serviços. Usando: "${encontrados[0].nomeServico}".`,
+            "erro"
+          );
+        }
+
+        return encontrados[0];
+      } catch (erro) {
+        mostrarAviso(erro.message, "erro");
+        console.error(erro);
+        return null;
+      }
+    }
+
+    async function buscarServicoModal() {
+      const nomeDigitado = document.getElementById("ms-busca").value.trim();
+
+      if (!nomeDigitado) {
+        mostrarAviso("Informe parte do nome do serviço.", "erro");
+        return;
+      }
+
+      const servico = await buscarServicoPorNome(nomeDigitado);
+      if (!servico) return;
+
+      document.getElementById("ms-id-servico").value = servico.id;
+      document.getElementById("ms-nome").value = servico.nomeServico;
+      document.getElementById("ms-codigo").value = servico.codigoDoServico ?? "";
+      document.getElementById("ms-preco").value =
+        (servico.precoUnitario ?? servico.precoServico ?? 0).toFixed(2);
+    }
+
+    function confirmarServico() {
+      const id = document.getElementById("ms-id-servico").value;
+
+      if (!id) {
+        mostrarAviso("Busque e selecione um serviço primeiro.", "erro");
+        return;
+      }
+
+      const nome   = document.getElementById("ms-nome").value;
+      const codigo = document.getElementById("ms-codigo").value;
+      const preco  = parseFloat(document.getElementById("ms-preco").value) || 0;
+      const desc   = parseFloat(document.getElementById("ms-desc").value) || 0;
+
+      const total = preco * (1 - desc / 100);
+
+      servicos.push({
+        id,
+        nome,
+        codigo,
+        preco,
+        desc,
+        total
+      });
+
+      atualizarTabela();
+
+      if (modalServico) modalServico.hide();
+
+      mostrarAviso(`Serviço "${nome}" adicionado à venda.`, "sucesso");
+    }
+
 
     function normalizarDocumento(doc) {
       return (doc || "").replace(/\D/g, "");
     }
 
-    
     async function buscarListaClientes() {
       try {
         const resp = await fetch(`${API_BASE}/api/cliente`);
@@ -453,7 +516,6 @@ async function adicionarServico() {
       }
     }
 
-    
     async function buscarClientePorNomeOuCpf(nomeDigitado, cpfDigitado) {
       const lista = await buscarListaClientes();
       if (!lista.length) {
@@ -463,7 +525,6 @@ async function adicionarServico() {
       const cpfNormalizado = normalizarDocumento(cpfDigitado);
       const nomeNormalizado = (nomeDigitado || "").trim().toLowerCase();
 
-      
       if (cpfNormalizado) {
         const encontradosPorDoc = lista.filter(c => {
           const cpf = normalizarDocumento(c.cpf);
@@ -483,7 +544,6 @@ async function adicionarServico() {
         }
       }
 
-      
       if (nomeNormalizado) {
         const encontradosPorNome = lista.filter(c => {
           const nome = (c.nome || c.razaoSocial || "").toLowerCase();
@@ -509,7 +569,6 @@ async function adicionarServico() {
       return null;
     }
 
-    
     async function selecionarCliente() {
       const inputNome = document.getElementById("input-nomeCliente");
       const inputCpf = document.getElementById("input-cpfCliente");
@@ -539,11 +598,6 @@ async function adicionarServico() {
       mostrarAviso(`Cliente "${displayNome}" selecionado.`, "sucesso");
     }
 
-
-    
-
-    
-
     function removerItem(tipo, index) {
       if (tipo === "produto") {
         produtos.splice(index, 1);
@@ -553,78 +607,76 @@ async function adicionarServico() {
       atualizarTabela();
     }
 
-    
     function atualizarTabela() {
-  const tabelaProdutos = document.querySelector("#tabela-produtos tbody");
-  const tabelaServicos = document.querySelector("#tabela-servicos tbody");
+      const tabelaProdutos = document.querySelector("#tabela-produtos tbody");
+      const tabelaServicos = document.querySelector("#tabela-servicos tbody");
 
-  tabelaProdutos.innerHTML = "";
-  tabelaServicos.innerHTML = "";
+      tabelaProdutos.innerHTML = "";
+      tabelaServicos.innerHTML = "";
 
-  produtos.forEach((p, i) => {
-    tabelaProdutos.innerHTML += `
-      <tr>
-        <td>${p.nome}</td>
-        <td>${p.codigo || "-"}</td>
-        <td>${p.qtd}</td>
-        <td>R$ ${p.preco.toFixed(2)}</td>
-        <td>${p.desc}%</td>
-        <td>R$ ${p.total.toFixed(2)}</td>
-        <td>
-          <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('produto', ${i})">
-            Excluir
-          </button>
-        </td>
-      </tr>`;
-  });
+      produtos.forEach((p, i) => {
+        tabelaProdutos.innerHTML += `
+          <tr>
+            <td>${p.nome}</td>
+            <td>${p.codigo || "-"}</td>
+            <td>${p.qtd}</td>
+            <td>R$ ${p.preco.toFixed(2)}</td>
+            <td>${p.desc}%</td>
+            <td>R$ ${p.total.toFixed(2)}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('produto', ${i})">
+                Excluir
+              </button>
+            </td>
+          </tr>`;
+      });
 
-  servicos.forEach((s, i) => {
-    tabelaServicos.innerHTML += `
-      <tr>
-        <td>${s.nome}</td>
-        <td>${s.codigo || "-"}</td>
-        <td>R$ ${s.preco.toFixed(2)}</td>
-        <td>${s.desc}%</td>
-        <td>R$ ${s.total.toFixed(2)}</td>
-        <td>
-          <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('servico', ${i})">
-            Excluir
-          </button>
-        </td>
-      </tr>`;
-  });
+      servicos.forEach((s, i) => {
+        tabelaServicos.innerHTML += `
+          <tr>
+            <td>${s.nome}</td>
+            <td>${s.codigo || "-"}</td>
+            <td>R$ ${s.preco.toFixed(2)}</td>
+            <td>${s.desc}%</td>
+            <td>R$ ${s.total.toFixed(2)}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('servico', ${i})">
+                Excluir
+              </button>
+            </td>
+          </tr>`;
+      });
 
-  
-  const subtotal =
-    produtos.reduce((sum, p) => sum + p.total, 0) +
-    servicos.reduce((sum, s) => sum + s.total, 0);
+      const subtotal =
+        produtos.reduce((sum, p) => sum + p.total, 0) +
+        servicos.reduce((sum, s) => sum + s.total, 0);
 
-  
-  const inputDesconto = document.getElementById("input-desconto");
-  const descontoPercent = parseFloat(inputDesconto.value) || 0;
+      const inputDesconto = document.getElementById("input-desconto");
+      let descontoValor = parseFloat(inputDesconto.value) || 0;
 
-  
-  const descontoAjustado = Math.min(Math.max(descontoPercent, 0), 100);
-  if (descontoAjustado !== descontoPercent) {
-    inputDesconto.value = descontoAjustado; 
-  }
+      if (descontoValor < 0) {
+        descontoValor = 0;
+        inputDesconto.value = "0";
+      }
 
-  const fatorDesconto = descontoAjustado / 100;
-  const totalComDesconto = subtotal * (1 - fatorDesconto);
+      if (descontoValor > subtotal) {
+        descontoValor = subtotal;
+        inputDesconto.value = subtotal.toFixed(2);
+      }
 
-  document.getElementById("valor-total").innerText = totalComDesconto.toFixed(2);
-}
+      const totalComDesconto = subtotal - descontoValor;
+      const totalFinal = Math.max(0, totalComDesconto);
 
+      document.getElementById("valor-total").innerText = totalFinal.toFixed(2);
+    }
 
-    //  FINALIZAR VENDA 
     async function finalizarVenda() {
       const idCliente = document.getElementById("input-idCliente").value.trim();
-      const descontoGeralPercent = parseFloat(document.getElementById("input-desconto").value) || 0;
-      const tipoPagamento = document.getElementById("tipo-pagamento").value;
-      const meioPagamento = document.getElementById("meio-pagamento").value;
+      const descontoGeralValor = parseFloat(document.getElementById("input-desconto").value) || 0;
+      const tipoPagamento = parseInt(document.getElementById("tipo-pagamento").value, 10);
+      const meioPagamento = parseInt(document.getElementById("meio-pagamento").value, 10);
       let parcelas = parseInt(document.getElementById("parcelas").value, 10) || 1;
 
-      
       if (!idCliente) {
         mostrarAviso("Selecione/busque um cliente antes de finalizar a venda.", "erro");
         return;
@@ -635,8 +687,7 @@ async function adicionarServico() {
         return;
       }
 
-      // se for à vista, força 1 parcela
-      if (tipoPagamento === "AVista") {
+      if (tipoPagamento === 0) {
         parcelas = 1;
         document.getElementById("parcelas").value = 1;
       }
@@ -646,44 +697,37 @@ async function adicionarServico() {
         return;
       }
 
-      // monta ItensVenda (ItemVendaInputDto)
       const itensVenda = produtos.map(p => ({
-        idProduto: p.id,               
+        idProduto: p.id,
         quantidade: p.qtd,
-        descontoUnitario: p.desc || 0  
+        descontoUnitario: p.desc || 0
       }));
 
-      // monta ServicosVenda (ServicoVendaInputDto)
       const servicosVenda = servicos.map(s => ({
         idServico: s.id,
-        descontoServico: s.desc || 0   
+        descontoServico: s.desc || 0
       }));
 
-      // VendaInputDto
       const vendaDto = {
-        idCliente: idCliente,
-        descontoSobreTotalVenda: descontoGeralPercent, 
-        itensVenda: itensVenda,
-        servicosVenda: servicosVenda
+        IdCliente: idCliente,
+        DescontoSobreTotalVenda: descontoGeralValor,
+        ItensVenda: itensVenda,
+        ServicosVenda: servicosVenda
       };
 
-
-      // TransacaoInputDto
       const transacaoDto = {
-        tipoPagamento: tipoPagamento,     
-        meioPagamaneto: meioPagamento,   
-        quantidadeDeParcelas: parcelas
+        TipoPagamento: tipoPagamento,
+        MeioPagamento: meioPagamento,
+        QuantidadeDeParcelas: parcelas
       };
 
-      // VendaTransacaoInputDto
       const payload = {
-        venda: vendaDto,
-        transacao: transacaoDto
+        Venda: vendaDto,
+        Transacao: transacaoDto
       };
 
       console.log("JSON que está indo pro backend:");
       console.log(JSON.stringify(payload, null, 2));
-
 
       try {
         const resp = await fetch(`${API_BASE}/api/venda`, {
@@ -713,28 +757,21 @@ async function adicionarServico() {
 
         let vendaCriada = null;
         try {
-          vendaCriada = JSON.parse(textoResposta); // VendaTransacaoOutputDto
-        } catch (e) {
-         
-        }
+          vendaCriada = JSON.parse(textoResposta);
+        } catch (e) {}
 
         mostrarAviso("Venda registrada com sucesso!", "sucesso");
         console.log("Venda criada:", vendaCriada);
 
-        
         produtos = [];
         servicos = [];
         atualizarTabela();
-        // mantém cliente preenchido, só zera desconto geral:
         document.getElementById("input-desconto").value = 0;
       } catch (erro) {
         console.error("Erro ao finalizar venda:", erro);
         mostrarAviso(erro.message, "erro");
       }
     }
-
-
-
   </script>
 </body>
 </html>

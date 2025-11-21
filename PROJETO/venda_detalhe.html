@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detalhes da Venda</title>
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/styleVendas.css">
 </head>
@@ -28,7 +27,8 @@
               <li><a class="dropdown-item" href="buscar_clientes.html">Clientes</a></li>
               <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
               <li><a class="dropdown-item" href="buscar_serviços.html">Serviços</a></li>
-              <li><a class="dropdown-item" href="buscar_vendas.html">Vendas</a></li>
+              <li><a class="dropdown-item active" href="buscar_vendas.html">Vendas</a></li>
+              <li><a class="dropdown-item " href="relatorios.html">Relatórios</a></li>
             </ul>
           </li>
         </ul>
@@ -55,7 +55,6 @@
       <div class="card-body">
         <h5>Informações Gerais</h5>
         <div id="info-geral" class="row g-2">
-          <!-- preenchido via JS -->
         </div>
       </div>
     </div>
@@ -65,7 +64,6 @@
       <div class="card-body">
         <h5>Cliente</h5>
         <div id="info-cliente" class="row g-2">
-          <!-- preenchido via JS -->
         </div>
       </div>
     </div>
@@ -87,7 +85,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- JS -->
             </tbody>
           </table>
         </div>
@@ -110,7 +107,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- JS -->
             </tbody>
           </table>
         </div>
@@ -122,7 +118,6 @@
       <div class="card-body">
         <h5>Transação / Pagamento</h5>
         <div id="info-transacao" class="row g-2">
-          <!-- JS -->
         </div>
       </div>
     </div>
@@ -133,7 +128,7 @@
 
   <script>
     const API_BASE = "https://localhost:7036";
-    let vendaGlobal = null; // guardo pra usar no excluir/editar
+    let vendaGlobal = null; 
 
     function mostrarAviso(msg, tipo) {
       const aviso = document.createElement("div");
@@ -164,11 +159,12 @@
     function preencherInfoGeral(venda, transacao) {
       const div = document.getElementById("info-geral");
       div.innerHTML = `
-        <div class="col-md-3"><strong>ID Venda:</strong> ${venda.idVenda}</div>
+        <div class="col-md-3"><strong>Código da Venda:</strong> ${venda.codigoVenda ?? "—"}</div>
         <div class="col-md-3"><strong>Data:</strong> ${formatarData(venda.dataCriacao)}</div>
-        <div class="col-md-3"><strong>Desconto Geral (%):</strong> ${venda.desconto}</div>
-        <div class="col-md-3"><strong>Total com Desconto (R$):</strong> ${venda.valorTotalComDescontoAplicado.toFixed(2)}</div>
+        <div class="col-md-3"><strong>Desconto Geral (R$):</strong> ${Number(venda.descontoTotalVenda ?? 0).toFixed(2)}</div>
+        <div class="col-md-3"><strong>Total com Desconto (R$):</strong> ${Number(venda.valorTotalComDesconto ?? 0).toFixed(2)}</div>
       `;
+
     }
 
     function preencherInfoCliente(cliente) {
@@ -197,7 +193,7 @@
         const nome = produto.nomeProduto || "—";
         const codigo = produto.codigoDeBarra || "—";
         const qtd = item.quantidade ?? 0;
-        const precoNaVenda = item.precoUnitarioNaVenda ?? produto.precoUnitario ?? 0;
+        const precoNaVenda = item.precoUnitarioDoProdutoNaVenda ?? produto.precoUnitario ?? 0;
         const desc = item.descontoUnitario ?? 0;
         const total = qtd * precoNaVenda * (1 - desc / 100);
 
@@ -244,42 +240,39 @@
     }
 
     function preencherInfoTransacao(transacao) {
-        const div = document.getElementById("info-transacao");
+      const div = document.getElementById("info-transacao");
 
-        if (!transacao) {
-            div.innerHTML = `<div class="col-12 text-muted">Nenhuma transação registrada.</div>`;
-            return;
-        }
+      if (!transacao) {
+        div.innerHTML = `<div class="col-12 text-muted">Nenhuma transação registrada.</div>`;
+        return;
+      }
 
-        const situacao = transacao.pago
-            ? "Paga"
-            : (transacao.transacaoEmCurso ? "Em andamento" : "Em aberto");
+      const situacao = transacao.pago
+        ? "Paga"
+        : (transacao.transacaoEmCurso ? "Em andamento" : "Em aberto");
 
-        div.innerHTML = `
-            <div class="col-md-3"><strong>ID Transação:</strong> ${transacao.idTransacao}</div>
-            <div class="col-md-3"><strong>Data:</strong> ${formatarData(transacao.dataCriacao)}</div>
-            <div class="col-md-3"><strong>Tipo Pagamento:</strong> ${transacao.tipoPagamento}</div>
-            <div class="col-md-3"><strong>Meio Pagamento:</strong> ${transacao.meioPagamento}</div>
-            <div class="col-md-3"><strong>Parcelas:</strong> ${transacao.numeroDeParcelas}</div>
-            <div class="col-md-3"><strong>Pagas:</strong> ${transacao.numeroDeParcelasPagas}</div>
-            <div class="col-md-3"><strong>Valor Pago (R$):</strong> ${transacao.valorPago?.toFixed(2) || "0.00"}</div>
-            <div class="col-md-3"><strong>Situação:</strong> ${situacao}</div>
-        `;
+      div.innerHTML = `
+        <div class="col-md-3"><strong>ID Transação:</strong> ${transacao.idTransacao}</div>
+        <div class="col-md-3"><strong>Data:</strong> ${formatarData(transacao.dataCriacao)}</div>
+        <div class="col-md-3"><strong>Tipo Pagamento:</strong> ${transacao.tipoPagamento}</div>
+        <div class="col-md-3"><strong>Meio Pagamento:</strong> ${transacao.meioPagamento}</div>
+        <div class="col-md-3"><strong>Parcelas:</strong> ${transacao.numeroDeParcelasNaoPagas + transacao.numeroDeParcelasPagas}</div>
+        <div class="col-md-3"><strong>Pagas:</strong> ${transacao.numeroDeParcelasPagas}</div>
+        <div class="col-md-3"><strong>Valor Pago (R$):</strong> ${Number(transacao.valorPago ?? 0).toFixed(2)}</div>
+        <div class="col-md-3"><strong>Situação:</strong> ${situacao}</div>
+      `;
 
-        // DESATIVA EXCLUIR SE A VENDA ESTIVER PAGA
-        const btnExcluir = document.getElementById("btn-excluir");
-        const btnEditar = document.getElementById("btn-editar");
+      const btnExcluir = document.getElementById("btn-excluir");
+      const btnEditar  = document.getElementById("btn-editar");
 
-        if (transacao.numeroDeParcelasPagas > 0) {
+      if (transacao.numeroDeParcelasPagas > 0 || transacao.pago) {
+        btnExcluir.disabled = true;
+        btnExcluir.title = "Venda com parcelas pagas não pode ser excluída.";
 
-            btnExcluir.disabled = true;
-            btnExcluir.title = "Venda paga não pode ser excluída.";
-
-            btnEditar.disabled = true;
-            btnEditar.title = "Venda paga não pode ser editada.";
-        }
-        }
-
+        btnEditar.disabled = true;
+        btnEditar.title = "Venda com parcelas pagas não pode ser editada.";
+      }
+    }
 
     async function carregarVenda() {
       const id = obterParametroUrl("id");
@@ -291,7 +284,9 @@
       try {
         const resp = await fetch(`${API_BASE}/api/venda/${encodeURIComponent(id)}`);
         if (!resp.ok) throw new Error(`Erro ${resp.status}: não foi possível carregar a venda.`);
-        const dados = await resp.json(); 
+        const dados = await resp.json();
+
+        console.log("Resposta da API (detalhe venda):", dados);
 
         vendaGlobal = dados;
 
@@ -311,48 +306,55 @@
     }
 
     function editarVenda() {
-        if (!vendaGlobal) {
-            return mostrarAviso("Venda não carregada.", "erro");
-        }
-
-        
-        const id =
-            vendaGlobal?.venda?.idVenda ||
-            vendaGlobal?.idVenda ||
-            null;
-
-        console.log("vendaGlobal usado no editarVenda:", vendaGlobal);
-        console.log("ID de venda detectado para edição:", id);
-
-        if (!id) {
-            return mostrarAviso("Não foi possível identificar o ID da venda para edição.", "erro");
-        }
-
-        
-        window.location.href = "editar_venda.html?id=" + encodeURIComponent(id);
-        }
-
-     function irParaPagamento() {
-        if (!vendaGlobal || !vendaGlobal.venda) {
-            return mostrarAviso("Venda não carregada.", "erro");
-        }
-        const idVenda = vendaGlobal.venda.idVenda;
-        window.location.href = "pagar_parcelas.html?id=" + encodeURIComponent(idVenda);
-        }
-
-
-
-    async function excluirVenda() {
-      if (!vendaGlobal || !vendaGlobal.venda) {
+      if (!vendaGlobal) {
         return mostrarAviso("Venda não carregada.", "erro");
       }
 
-      const transacao = vendaGlobal.transacao;
-      if (transacao && transacao.pago) {
-        return mostrarAviso("Venda paga não pode ser excluída.", "erro");
+      const vendaObj = vendaGlobal.venda || vendaGlobal;
+      const id =
+        vendaObj.idVenda ||
+        vendaObj.id ||
+        null;
+
+      console.log("vendaGlobal usado no editarVenda:", vendaGlobal);
+      console.log("ID de venda detectado para edição:", id);
+
+      if (!id) {
+        return mostrarAviso("Não foi possível identificar o ID da venda para edição.", "erro");
       }
 
-      const id = vendaGlobal.venda.idVenda;
+      window.location.href = "editar_venda.html?id=" + encodeURIComponent(id);
+    }
+
+    function irParaPagamento() {
+      if (!vendaGlobal || !vendaGlobal.venda) {
+        return mostrarAviso("Venda não carregada.", "erro");
+      }
+      const idVenda = vendaGlobal.venda.idVenda;
+      window.location.href = "pagar_parcelas.html?id=" + encodeURIComponent(idVenda);
+    }
+
+    async function excluirVenda() {
+      if (!vendaGlobal) {
+        return mostrarAviso("Venda não carregada.", "erro");
+      }
+
+      const venda = vendaGlobal.venda || vendaGlobal;
+      const transacao = vendaGlobal.transacao;
+
+      const id =
+        venda.idVenda ||
+        venda.id ||
+        null;
+
+      if (!id) {
+        console.error("Estrutura inesperada de vendaGlobal:", vendaGlobal);
+        return mostrarAviso("Não foi possível identificar o ID da venda para exclusão.", "erro");
+      }
+
+      if (transacao && (transacao.pago || transacao.numeroDeParcelasPagas > 0)) {
+        return mostrarAviso("Venda com parcelas pagas não pode ser excluída.", "erro");
+      }
 
       if (!confirm("Tem certeza que deseja excluir esta venda?")) return;
 
@@ -362,17 +364,18 @@
         });
 
         const texto = await resp.text();
+        console.log("Resposta da exclusão:", resp.status, texto);
 
         if (!resp.ok) {
-          throw new Error(texto || "Erro ao excluir venda.");
+          throw new Error(texto || `Erro ${resp.status} ao excluir venda.`);
         }
 
-        mostrarAviso("Venda excluída com sucesso!", "sucesso");
+        mostrarAviso(texto || "Venda excluída com sucesso!", "sucesso");
         setTimeout(() => {
           window.location.href = "buscar_vendas.html";
         }, 1500);
       } catch (erro) {
-        console.error(erro);
+        console.error("Erro ao excluir venda:", erro);
         mostrarAviso(erro.message, "erro");
       }
     }

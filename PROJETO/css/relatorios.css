@@ -1,0 +1,80 @@
+body {
+  background-color: #f2f2f2;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+.botoes-relatorio{
+  width: 15%;
+  margin-top: 3%;
+  height: 12vh;
+  border: none;
+  color: #fff;
+}
+
+.botao-gerar-relatorio-produtos-mais-vendidos{
+  background-color: #0E4D64;
+}
+.botao-gerar-relatorio-produtos-mais-vendidos:hover {
+  background-color: #0c3f52;
+  color: #fff;
+}
+
+.botao-gerar-relatorio-produtos-em-falta{
+  background-color: #D9822B;
+}
+
+.botao-gerar-relatorio-produtos-em-falta:hover {
+  background-color: #b86c22;
+  color: #fff;
+}
+
+.botao-gerar-relatorio-de-vendas-por-periodo{
+  background-color:#4F4F4F ;
+}
+
+.botao-gerar-relatorio-de-vendas-por-periodo:hover {
+  background-color: #3b3b3b;
+  color: #fff;
+}
+.div-gerar-relatorio-vendas-por-periodo{
+  background-color: #ececec;
+  z-index: 10;
+  width: 37%;
+  height: 45vh;
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 15px;
+  opacity: 8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  display: none;
+}
+
+.botao-gerar-relatorio{
+  background-color: #0d6efd ;
+  border: none;
+  width: 25%;
+  height: 13%;
+  position: relative;
+  top: 18%;
+  left: 72%;
+  border-radius: 15px;
+}
+
+.form-control {
+  border-radius: 10px;
+  padding: 10px 12px;
+  width: 90%;
+  margin-left: 2%;
+}
+label{
+  font-size: 18px;
+  margin-left: 2%;
+}
+.icone-arrow{
+  font-size: 27px;
+  position: absolute;
+  top: 22px;
+  left: 2%;
+  cursor: pointer;
+}

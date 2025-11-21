@@ -8,7 +8,6 @@
 </head>
 <body class="bg-light">
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
   <div class="container-fluid">
     <a class="navbar-brand" href="home.html">Home</a>
@@ -25,7 +24,8 @@
             <li><a class="dropdown-item" href="buscar_clientes.html">Clientes</a></li>
             <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
             <li><a class="dropdown-item" href="buscar_serviços.html">Serviços</a></li>
-            <li><a class="dropdown-item" href="buscar_vendas.html">Vendas</a></li>
+            <li><a class="dropdown-item active" href="buscar_vendas.html">Vendas</a></li>
+            <li><a class="dropdown-item" href="relatorios.html">Relatórios</a></li>
           </ul>
         </li>
       </ul>
@@ -33,34 +33,26 @@
   </div>
 </nav>
 
-
 <div class="container my-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Pagamento de Parcelas da Venda</h2>
     <a href="buscar_vendas.html" class="btn btn-secondary">Voltar</a>
   </div>
 
-  
   <div class="card mb-3">
     <div class="card-body">
       <h5>Informações da Venda</h5>
-      <div class="row g-2" id="info-venda">
-        <!-- preenchido via JS -->
-      </div>
+      <div class="row g-2" id="info-venda"></div>
     </div>
   </div>
 
-  
   <div class="card mb-3">
     <div class="card-body">
       <h5>Informações da Transação</h5>
-      <div class="row g-2" id="info-transacao">
-        <!-- preenchido via JS -->
-      </div>
+      <div class="row g-2" id="info-transacao"></div>
     </div>
   </div>
 
- 
   <div class="card mb-3">
     <div class="card-body">
       <h5>Registrar Pagamento de Parcelas</h5>
@@ -85,10 +77,9 @@
   const API_BASE = "https://localhost:7036";
   const API_VENDA = API_BASE + "/api/venda";
 
-  let vendaCarregada = null;   
-  let transacaoAtual = null;   
+  let vendaCarregada = null;
+  let transacaoAtual = null;
 
-  // UTIL
   function mostrarAviso(msg, tipo) {
     const aviso = document.createElement("div");
     aviso.className = `alert ${tipo === "sucesso" ? "alert-success" : "alert-warning"} position-fixed top-0 end-0 m-3`;
@@ -116,68 +107,81 @@
     const cliente = venda.cliente || {};
     const nomeCliente = cliente.nome || cliente.razaoSocial || "—";
 
+    const codigoVenda =
+      venda.codigoDaVenda ??
+      venda.codigoVenda ??
+      venda.codigo ??
+      venda.codigoDaVendaComMascara ??
+      venda.idVenda;
+
     div.innerHTML = `
-      <div class="col-md-3"><strong>ID Venda:</strong> ${venda.idVenda}</div>
+      <div class="col-md-3"><strong>Código da Venda:</strong> ${codigoVenda}</div>
       <div class="col-md-3"><strong>Data:</strong> ${formatarData(venda.dataCriacao)}</div>
       <div class="col-md-3"><strong>Cliente:</strong> ${nomeCliente}</div>
-      <div class="col-md-3"><strong>Total com Desconto (R$):</strong> ${Number(venda.valorTotalComDescontoAplicado ?? 0).toFixed(2)}</div>
+      <div class="col-md-3"><strong>Total com Desconto (R$):</strong> ${Number(venda.valorTotalComDesconto ?? 0).toFixed(2)}</div>
     `;
   }
 
-  function preencherInfoTransacao(transacao) {
-    const div = document.getElementById("info-transacao");
-    if (!transacao) {
-      div.innerHTML = `<div class="col-12 text-muted">Nenhuma transação encontrada para esta venda.</div>`;
-      return;
-    }
-
-    const numeroDeParcelas = transacao.numeroDeParcelas ?? 1;
-    const numeroDeParcelasPagas = transacao.numeroDeParcelasPagas ?? 0;
-    const numeroDeParcelasNaoPagas = transacao.numeroDeParcelasNaoPagas ??
-                                     (numeroDeParcelas - numeroDeParcelasPagas);
-
-    const situacao = transacao.pago
-      ? "Paga"
-      : (transacao.transacaoEmCurso ? "Em andamento" : "Em aberto");
-
-    div.innerHTML = `
-      <div class="col-md-3"><strong>ID Transação:</strong> ${transacao.idTransacao}</div>
-      <div class="col-md-3"><strong>Data:</strong> ${formatarData(transacao.dataCriacao)}</div>
-      <div class="col-md-3"><strong>Tipo Pagamento:</strong> ${transacao.tipoPagamento}</div>
-      <div class="col-md-3"><strong>Meio Pagamento:</strong> ${transacao.meioPagamento}</div>
-      <div class="col-md-3"><strong>Parcelas Totais:</strong> ${numeroDeParcelas}</div>
-      <div class="col-md-3"><strong>Parcelas Pagas:</strong> ${numeroDeParcelasPagas}</div>
-      <div class="col-md-3"><strong>Parcelas em Aberto:</strong> ${numeroDeParcelasNaoPagas}</div>
-      <div class="col-md-3"><strong>Valor Pago (R$):</strong> ${Number(transacao.valorPago ?? 0).toFixed(2)}</div>
-      <div class="col-md-3"><strong>Situação:</strong> ${situacao}</div>
-    `;
-
-    // guardar em variáveis globais
-    transacaoAtual = {
-      ...transacao,
-      numeroDeParcelas,
-      numeroDeParcelasPagas,
-      numeroDeParcelasNaoPagas
-    };
-
-    
-    const inputQtd = document.getElementById("input-qtd-parcelas");
-    const textoLimite = document.getElementById("texto-limite");
-    const btnPagar = document.getElementById("btn-pagar");
-
-    if (transacao.pago || numeroDeParcelasNaoPagas <= 0) {
-      inputQtd.disabled = true;
-      btnPagar.disabled = true;
-      textoLimite.textContent = "Venda já está totalmente paga.";
-    } else {
-      inputQtd.disabled = false;
-      btnPagar.disabled = false;
-      inputQtd.max = numeroDeParcelasNaoPagas;
-      textoLimite.textContent = `Máximo de parcelas que você pode marcar como pagas agora: ${numeroDeParcelasNaoPagas}.`;
-    }
+ function preencherInfoTransacao(transacao) {
+  const div = document.getElementById("info-transacao");
+  if (!transacao) {
+    div.innerHTML = `<div class="col-12 text-muted">Nenhuma transação encontrada para esta venda.</div>`;
+    return;
   }
 
-  // CARREGAR VENDA 
+  const numeroDeParcelasPagas   = transacao.numeroDeParcelasPagas   ?? 0;
+  const numeroDeParcelasNaoPagas = transacao.numeroDeParcelasNaoPagas ?? 0;
+
+  let numeroDeParcelas =
+    transacao.numeroDeParcelas ??
+    transacao.quantidadeDeParcelas ??
+    0;
+
+  const somaCalculada = numeroDeParcelasPagas + numeroDeParcelasNaoPagas;
+  if (!numeroDeParcelas || numeroDeParcelas < somaCalculada) {
+    numeroDeParcelas = somaCalculada;
+  }
+
+  const situacao = transacao.pago
+    ? "Paga"
+    : (transacao.transacaoEmCurso ? "Em andamento" : "Em aberto");
+
+  div.innerHTML = `
+    <div class="col-md-3"><strong>ID Transação:</strong> ${transacao.idTransacao}</div>
+    <div class="col-md-3"><strong>Data:</strong> ${formatarData(transacao.dataCriacao)}</div>
+    <div class="col-md-3"><strong>Tipo Pagamento:</strong> ${transacao.tipoPagamento}</div>
+    <div class="col-md-3"><strong>Meio Pagamento:</strong> ${transacao.meioPagamento}</div>
+    <div class="col-md-3"><strong>Parcelas Totais:</strong> ${numeroDeParcelas}</div>
+    <div class="col-md-3"><strong>Parcelas Pagas:</strong> ${numeroDeParcelasPagas}</div>
+    <div class="col-md-3"><strong>Parcelas em Aberto:</strong> ${numeroDeParcelasNaoPagas}</div>
+    <div class="col-md-3"><strong>Valor Pago (R$):</strong> ${Number(transacao.valorPago ?? 0).toFixed(2)}</div>
+    <div class="col-md-3"><strong>Situação:</strong> ${situacao}</div>
+  `;
+
+  transacaoAtual = {
+    ...transacao,
+    numeroDeParcelas,
+    numeroDeParcelasPagas,
+    numeroDeParcelasNaoPagas
+  };
+
+  const inputQtd   = document.getElementById("input-qtd-parcelas");
+  const textoLimite = document.getElementById("texto-limite");
+  const btnPagar   = document.getElementById("btn-pagar");
+
+  if (transacao.pago || numeroDeParcelasNaoPagas <= 0) {
+    inputQtd.disabled = true;
+    btnPagar.disabled = true;
+    textoLimite.textContent = "Venda já está totalmente paga.";
+  } else {
+    inputQtd.disabled = false;
+    btnPagar.disabled = false;
+    inputQtd.max = numeroDeParcelasNaoPagas;
+    textoLimite.textContent =
+      `Máximo de parcelas que você pode marcar como pagas agora: ${numeroDeParcelasNaoPagas}.`;
+  }
+}
+
   async function carregarVenda() {
     const idVenda = obterParametroUrl("id");
     if (!idVenda) {
@@ -190,7 +194,7 @@
       if (!resp.ok) {
         throw new Error(`Erro ${resp.status} ao buscar venda.`);
       }
-      const dados = await resp.json(); // VendaTransacaoOutputDto
+      const dados = await resp.json();
 
       vendaCarregada = dados;
       preencherInfoVenda(dados.venda);
@@ -201,69 +205,62 @@
     }
   }
 
-  
- async function pagarParcelas() {
-  if (!transacaoAtual || !transacaoAtual.idTransacao) {
-    mostrarAviso("Transação não carregada.", "erro");
-    return;
-  }
-
-  const inputQtd = document.getElementById("input-qtd-parcelas");
-  const qtd = Number(inputQtd.value);
-
-  
-  if (!qtd || qtd <= 0) {
-    mostrarAviso("Informe uma quantidade válida de parcelas.", "erro");
-    return;
-  }
-
-  if (qtd > transacaoAtual.numeroDeParcelasNaoPagas) {
-    mostrarAviso("Quantidade maior do que o número de parcelas em aberto.", "erro");
-    return;
-  }
-
-  
-  const payload = {
-    QuantidadeDeParcelasASerAtualizadaParaPaga: qtd,
-    quantidadeDeParcelasASerAtualizadaParaPaga: qtd 
-  };
-
-  console.log("📤 Enviando PATCH com payload:", payload);
-
-  try {
-    const resp = await fetch(`${API_VENDA}/${encodeURIComponent(transacaoAtual.idTransacao)}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const texto = await resp.text();
-
-    if (!resp.ok) {
-      let msg = "Erro ao registrar pagamento.";
-
-      try {
-        const json = JSON.parse(texto);
-        if (Array.isArray(json)) msg = json.join(" | ");
-        else if (typeof json === "string") msg = json;
-      } catch {
-        if (texto) msg = texto;
-      }
-
-      throw new Error(msg);
+  async function pagarParcelas() {
+    if (!transacaoAtual || !transacaoAtual.idTransacao) {
+      mostrarAviso("Transação não carregada.", "erro");
+      return;
     }
 
-    mostrarAviso("Pagamento registrado com sucesso!", "sucesso");
+    const inputQtd = document.getElementById("input-qtd-parcelas");
+    const qtd = Number(inputQtd.value);
 
-   
-    await carregarVenda();
+    if (!qtd || qtd <= 0) {
+      mostrarAviso("Informe uma quantidade válida de parcelas.", "erro");
+      return;
+    }
 
-  } catch (erro) {
-    console.error("Erro no pagamento:", erro);
-    mostrarAviso(erro.message, "erro");
+    if (qtd > transacaoAtual.numeroDeParcelasNaoPagas) {
+      mostrarAviso("Quantidade maior do que o número de parcelas em aberto.", "erro");
+      return;
+    }
+
+    const payload = {
+      QuantidadeDeParcelasASerAtualizadaParaPaga: qtd,
+      quantidadeDeParcelasASerAtualizadaParaPaga: qtd
+    };
+
+    console.log("📤 Enviando PATCH com payload:", payload);
+
+    try {
+      const resp = await fetch(`${API_VENDA}/${encodeURIComponent(transacaoAtual.idTransacao)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const texto = await resp.text();
+
+      if (!resp.ok) {
+        let msg = "Erro ao registrar pagamento.";
+
+        try {
+          const json = JSON.parse(texto);
+          if (Array.isArray(json)) msg = json.join(" | ");
+          else if (typeof json === "string") msg = json;
+        } catch {
+          if (texto) msg = texto;
+        }
+
+        throw new Error(msg);
+      }
+
+      mostrarAviso("Pagamento registrado com sucesso!", "sucesso");
+      await carregarVenda();
+    } catch (erro) {
+      console.error("Erro no pagamento:", erro);
+      mostrarAviso(erro.message, "erro");
+    }
   }
-}
-
 
   document.addEventListener("DOMContentLoaded", carregarVenda);
 </script>

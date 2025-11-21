@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="css/relatorios.css" />
+</head>
+<body>
+    <div class="barra-horizontal">
+          <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="home.html">Home</a>
+              <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+                <span class="navbar-toggler-icon"></span>
+              </button>
+
+              <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                  <li class="nav-item dropdown">
+                    <a
+                      class="nav-link dropdown-toggle mt-1"
+                      href="#"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      Menu
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="buscar_clientes.html">Clientes</a></li>
+                      <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
+                      <li><a class="dropdown-item" href="buscar_serviços.html">Serviços</a></li>
+                      <li><a class="dropdown-item" href="buscar_vendas.html">Vendas</a></li>
+                      <li><a class="dropdown-item active" href="relatorios.html">Relatórios</a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+    </div>
+    <main class="d-flex flex-wrap justify-content-center gap-3">
+       <button onclick="gerarRelatorioDeProdutosMaisVendidos()" class="botao-gerar-relatorio-produtos-mais-vendidos botoes-relatorio btn  shortcut-btn d-flex justify-content-center align-items-center">
+        Relatório De Produtos Mais Vendidos
+      </button>
+      <button onclick="gerarRelatorioDeProdutosEmFalta()" class="botao-gerar-relatorio-produtos-em-falta botoes-relatorio btn  shortcut-btn d-flex justify-content-center align-items-center">
+        Relatório De Em Falta
+      </button>
+      <button onclick="mostrarDivRelatorioDeVendasPorPeriodo()" class="botao-gerar-relatorio-de-vendas-por-periodo botoes-relatorio btn  shortcut-btn d-flex justify-content-center align-items-center">
+        Relatório De Venda Por Período
+      </button>
+    </main>
+
+    <div class="div-gerar-relatorio-vendas-por-periodo">
+      <h3 class="text-center mt-3 mb-3">Relatório De Vendas Por Período</h3>
+        <i onclick="ocultarDivRelatorioDeVendasPorPeriodo()" class="icone-arrow fa-solid fa-arrow-left" style="color: #000000;"></i>
+        <label for="input-data-inicio">Data De Inicio Do Período</label>
+        <input class="form-control" id="input-data-inicio" type="date">
+        <label for="input-data-Fim">Data De Fim Do Período</label>
+        <input class="form-control" id="input-data-fim" type="date">
+        <button onclick="gerarRelatorioDeVendasPorPeriodo()" class="botao-gerar-relatorio">Gerar Relatório</button>
+    </div>
+
+    <script>
+      const API_URL_PRODUTOS = "https://localhost:7036/api/produto/";
+      const API_URL_VENDAS = "https://localhost:7036/api/venda/";
+      const divParaReceberAsDatasParaGerarVendaPorPeriodo=document.getElementsByClassName("div-gerar-relatorio-vendas-por-periodo")[0];
+      const inputDataInicio=document.getElementById("input-data-inicio");
+      const inputDataFim=document.getElementById("input-data-fim");
+      let dataDeInicioDoPeriodo;
+      let dataDeFimDoPeriodo;
+      function gerarRelatorioDeProdutosMaisVendidos(){
+        fetch(API_URL_PRODUTOS+"relatorio-produtos-mais-vendidos",{
+          method: 'GET'
+        })
+        .then(response=>response.blob())
+        .then(blob=>{
+          const url=URL.createObjectURL(blob);
+          window.open(url,"_blank")
+        })
+        .catch(erro=>alert("Erro ao gerar relatório"))
+      }
+
+      function gerarRelatorioDeProdutosEmFalta(){
+        fetch(API_URL_PRODUTOS+"relatorio-produtos-em-falta",{
+          method: 'GET'
+        })
+        .then(response=>response.blob())
+        .then(blob=>{
+          const url=URL.createObjectURL(blob);
+          window.open(url,"_blank")
+        })
+        .catch(erro=>alert("Erro ao gerar relatório"))
+      }
+      function mostrarDivRelatorioDeVendasPorPeriodo(){
+        divParaReceberAsDatasParaGerarVendaPorPeriodo.style.display="block";
+      }
+      function ocultarDivRelatorioDeVendasPorPeriodo(){
+        divParaReceberAsDatasParaGerarVendaPorPeriodo.style.display="none";
+        inputDataInicio.value="";
+        inputDataFim.value=""
+      }
+
+      function gerarRelatorioDeVendasPorPeriodo(){
+        dataDeInicioDoPeriodo=document.getElementById("input-data-inicio").value;
+        dataDeFimDoPeriodo=document.getElementById("input-data-fim").value;
+
+        if(!dataDeInicioDoPeriodo){
+          alert("Data de início precisa ser informada");
+          return
+        }
+        if(!dataDeFimDoPeriodo){
+          alert("Data de Fim precisa ser informada");
+          return
+        }
+
+        const regexData = /^\d{4}-\d{2}-\d{2}$/;
+
+        if(!regexData.test(dataDeInicioDoPeriodo)){
+          alert("Data de início está em formato inválido.");
+          return;
+        }
+
+        if(!regexData.test(dataDeFimDoPeriodo)){
+          alert("Data de Fim está em formato inválido.");
+          return;
+        }
+
+        let body={
+          DataDeInicioDoPeriodo : dataDeInicioDoPeriodo,
+          DataDeFimDoPeriodo : dataDeFimDoPeriodo
+        }
+        
+        fetch(API_URL_VENDAS+"relatorio-de-vendas-por-periodo",{
+          method : "POST",
+          headers :{
+            "Content-type" : "application/json"
+          },
+          body : JSON.stringify(body)
+        })
+         .then(response=>response.blob())
+        .then(blob=>{
+          const url=URL.createObjectURL(blob);
+          window.open(url,"_blank")
+        })
+        .catch(erro=>alert(erro))
+      }
+    </script>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
