@@ -8,10 +8,8 @@
   <link rel="stylesheet" href="css/styleVendas.css">
 </head>
 <body>
-  
-  
   <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
-    <div class="container-fluid">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
       <a class="navbar-brand" href="home.html">Home</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
         <span class="navbar-toggler-icon"></span>
@@ -30,6 +28,7 @@
           </li>
         </ul>
       </div>
+      <img class="img-logo" src="./resources/ImagemLogoEmpresaParaEstagio.png" alt="">
     </div>
   </nav>
 
@@ -38,14 +37,17 @@
 
     <form id="form-venda" class="mb-4">
       <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-          <label class="form-label">Nome do Cliente:</label>
-          <input type="text" id="input-nomeCliente" class="form-control" placeholder="Digite o nome do cliente">
+        <div class="col-md-4 position-relative">
+          <label class="form-label">Nome/Razão Social do Cliente:</label>
+          <input type="text" id="input-nomeCliente" class="form-control" placeholder="Digite o nome/ Razão Social da venda ">
+          <ul id="listaDeNomesBuscados"
+              class="autocomplete-list"
+              style="display: none; position: absolute; z-index: 1000;"></ul>
         </div>
-
+        
         <div class="col-md-3">
-          <label class="form-label">CPF do Cliente (opcional):</label>
-          <input type="text" id="input-cpfCliente" class="form-control" placeholder="000.000.000-00">
+          <label class="form-label">CPF/CNPJ do Cliente:</label>
+          <input type="text" id="input-cpfCliente" class="form-control" disabled>
           <div class="form-text"></div>
         </div>
 
@@ -64,7 +66,6 @@
           <button type="button" class="btn btn-success w-100" onclick="finalizarVenda()">
              💾 Finalizar Venda
           </button>
-
         </div>
       </div>
 
@@ -120,19 +121,19 @@
         <div class="col-md-3">
           <label class="form-label">Tipo de Pagamento:</label>
           <select id="tipo-pagamento" class="form-select">
-            <option value="0">À Vista</option>
-            <option value="1">A Prazo</option>
+            <option value="AVista">À Vista</option>
+            <option value="APrazo">A Prazo</option>
           </select>
         </div>
         <div class="col-md-3">
           <label class="form-label">Meio de Pagamento:</label>
           <select id="meio-pagamento" class="form-select">
-            <option value="0">Dinheiro</option>
-            <option value="1">Cartão de Débito</option>
-            <option value="2">Cartão de Crédito</option>
-            <option value="3">Pix</option>
-            <option value="4">Boleto</option>
-            <option value="5">Transferência Bancária</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="CartaoDebito">Cartão de Débito</option>
+            <option value="CartaoCredito">Cartão de Crédito</option>
+            <option value="Pix">Pix</option>
+            <option value="Boleto">Boleto</option>
+            <option value="TransferenciaBancaria">Transferência Bancária</option>
           </select>
         </div>
         <div class="col-md-3">
@@ -153,12 +154,14 @@
       <div class="modal-content p-3">
         <h5 class="mb-3">Adicionar Produto</h5>
 
-        <div class="mb-2">
+        <div class="mb-2 position-relative">
           <label class="form-label">Nome do Produto</label>
           <div class="input-group">
             <input type="text" id="mp-busca" class="form-control" placeholder="Digite parte do nome">
-            <button class="btn btn-outline-secondary" type="button" onclick="buscarProdutoModal()">Buscar</button>
           </div>
+          <ul id="lista-produtos-buscados"
+              class="autocomplete-list"
+              style="display:none; position:absolute; z-index:1000;"></ul>
         </div>
 
         <input type="hidden" id="mp-id-produto">
@@ -201,12 +204,14 @@
       <div class="modal-content p-3">
         <h5 class="mb-3">Adicionar Serviço</h5>
 
-        <div class="mb-2">
+        <div class="mb-2 position-relative">
           <label class="form-label">Nome do Serviço</label>
           <div class="input-group">
             <input type="text" id="ms-busca" class="form-control" placeholder="Digite parte do nome">
-            <button class="btn btn-outline-secondary" type="button" onclick="buscarServicoModal()">Buscar</button>
           </div>
+          <ul id="lista-servicos-buscados"
+              class="autocomplete-list"
+              style="display:none; position:absolute; z-index:1000;"></ul>
         </div>
 
         <input type="hidden" id="ms-id-servico">
@@ -239,539 +244,588 @@
     </div>
   </div>
 
+  
+  <div class="div-aviso"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const API_BASE = "https://localhost:7036";
+      <script>
+      const API_BASE = "https://localhost:7036";
 
-    let produtos = [];
-    let servicos = [];
-    let modalProduto;
-    let modalServico;
+      let produtos = [];
+      let servicos = [];
+      let modalProduto;
+      let modalServico;
+      let idCliente;
 
-    function mostrarAviso(mensagem, tipo) {
-      const aviso = document.createElement("div");
-      aviso.className = `alert ${tipo === "sucesso" ? "alert-success" : "alert-warning"} mt-3 position-fixed top-0 end-0 m-3`;
-      aviso.style.zIndex = "9999";
-      aviso.textContent = mensagem;
-      document.body.appendChild(aviso);
-      setTimeout(() => aviso.remove(), 4000);
-    }
+      
+      function mostrarAviso(mensagem, tipo) {
+        
+        let div = document.getElementById("div-aviso");
 
-    function obterParametroUrl(nome) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(nome);
-    }
-
-    function inicializarPaginaVenda() {
-      const idCliente = obterParametroUrl("idCliente");
-      const nome = obterParametroUrl("nome");
-      const cpf = obterParametroUrl("cpf");
-
-      if (idCliente) {
-        document.getElementById("input-idCliente").value = idCliente;
-      }
-      if (nome) {
-        document.getElementById("input-nomeCliente").value = nome;
-      }
-      if (cpf) {
-        document.getElementById("input-cpfCliente").value = cpf;
-      }
-
-      const inputNome = document.getElementById("input-nomeCliente");
-      const inputCpf = document.getElementById("input-cpfCliente");
-
-      inputCpf.addEventListener("blur", () => {
-        selecionarCliente();
-      });
-
-      inputNome.addEventListener("blur", () => {
-        const hiddenId = document.getElementById("input-idCliente").value;
-        if (!hiddenId) {
-          selecionarCliente();
-        }
-      });
-
-      const inputDesconto = document.getElementById("input-desconto");
-      inputDesconto.addEventListener("input", () => {
-        atualizarTabela();
-      });
-
-      modalProduto = new bootstrap.Modal(document.getElementById("modalProduto"));
-      modalServico = new bootstrap.Modal(document.getElementById("modalServico"));
-    }
-
-    document.addEventListener("DOMContentLoaded", inicializarPaginaVenda);
-
-    function abrirModalProduto() {
-      document.getElementById("mp-busca").value = "";
-      document.getElementById("mp-id-produto").value = "";
-      document.getElementById("mp-nome").value = "";
-      document.getElementById("mp-codigo").value = "";
-      document.getElementById("mp-qtd").value = 1;
-      document.getElementById("mp-preco").value = "";
-      document.getElementById("mp-desc").value = 0;
-
-      modalProduto.show();
-    }
-
-    async function buscarProdutoPorNome(nomeDigitado) {
-      try {
-        const resp = await fetch(`${API_BASE}/api/produto`);
-        if (!resp.ok) {
-          throw new Error("Erro ao buscar lista de produtos.");
+        if (!div) {
+          div = document.createElement("div");
+          div.id = "div-aviso";
+          div.className = "div-aviso";
+          document.body.appendChild(div);
         }
 
-        const lista = await resp.json();
-        const nomeNormalizado = nomeDigitado.trim().toLowerCase();
+        div.className = "div-aviso";
+        if (tipo === "sucesso") div.classList.add("sucesso");
+        else div.classList.add("erro");
 
-        const encontrados = lista.filter(p =>
-          (p.nomeProduto || "").toLowerCase().includes(nomeNormalizado)
-        );
+        div.textContent = mensagem;
 
-        if (encontrados.length === 0) {
-          throw new Error("Nenhum produto encontrado com esse nome.");
+        void div.offsetWidth;
+        div.classList.add("div-aviso-subir");
+
+        setTimeout(() => {
+          div.classList.remove("div-aviso-subir");
+        }, 4000);
+      }
+
+      function obterParametroUrl(nome) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(nome);
+      }
+
+      function inicializarPaginaVenda() {
+        const inputDesconto = document.getElementById("input-desconto");
+        inputDesconto.addEventListener("input", atualizarTabela);
+
+        modalProduto = new bootstrap.Modal(document.getElementById("modalProduto"));
+        modalServico = new bootstrap.Modal(document.getElementById("modalServico"));
+
+        const selectTipoPagamento = document.getElementById("tipo-pagamento");
+        const inputParcelas = document.getElementById("parcelas");
+
+        function atualizarCampoParcelas() {
+          if (selectTipoPagamento.value === "AVista") {
+            inputParcelas.value = 1;
+            inputParcelas.disabled = true;
+          } else {
+            inputParcelas.disabled = false;
+          }
         }
 
-        if (encontrados.length > 1) {
-          mostrarAviso(
-            `Foram encontrados ${encontrados.length} produtos. Usando: "${encontrados[0].nomeProduto}".`,
-            "erro"
-          );
-        }
-
-        return encontrados[0];
-      } catch (erro) {
-        mostrarAviso(erro.message, "erro");
-        console.error(erro);
-        return null;
+        selectTipoPagamento.addEventListener("change", atualizarCampoParcelas);
+        atualizarCampoParcelas();
       }
-    }
-
-    async function buscarProdutoModal() {
-      const nomeDigitado = document.getElementById("mp-busca").value.trim();
-
-      if (!nomeDigitado) {
-        mostrarAviso("Informe parte do nome do produto.", "erro");
-        return;
-      }
-
-      const produto = await buscarProdutoPorNome(nomeDigitado);
-      if (!produto) return;
-
-      document.getElementById("mp-id-produto").value = produto.id;
-      document.getElementById("mp-nome").value = produto.nomeProduto;
-      document.getElementById("mp-codigo").value = produto.codigoDeBarra ?? "";
-      document.getElementById("mp-preco").value = (produto.precoUnitario || 0).toFixed(2);
-    }
-
-    function confirmarProduto() {
-      const id = document.getElementById("mp-id-produto").value;
-
-      if (!id) {
-        mostrarAviso("Busque e selecione um produto primeiro.", "erro");
-        return;
-      }
-
-      const nome   = document.getElementById("mp-nome").value;
-      const codigo = document.getElementById("mp-codigo").value;
-      const qtd    = parseInt(document.getElementById("mp-qtd").value, 10) || 0;
-      const preco  = parseFloat(document.getElementById("mp-preco").value) || 0;
-      const desc   = parseFloat(document.getElementById("mp-desc").value) || 0;
-
-      if (qtd <= 0) {
-        mostrarAviso("Quantidade inválida.", "erro");
-        return;
-      }
-
-      const total = qtd * preco * (1 - desc / 100);
-
-      produtos.push({
-        id,
-        nome,
-        codigo,
-        qtd,
-        preco,
-        desc,
-        total
-      });
-
-      atualizarTabela();
-
-      if (modalProduto) modalProduto.hide();
-
-      mostrarAviso(`Produto "${nome}" adicionado à venda.`, "sucesso");
-    }
 
     
-    function abrirModalServico() {
-      document.getElementById("ms-busca").value = "";
-      document.getElementById("ms-id-servico").value = "";
-      document.getElementById("ms-nome").value = "";
-      document.getElementById("ms-codigo").value = "";
-      document.getElementById("ms-preco").value = "";
-      document.getElementById("ms-desc").value = 0;
-
-      modalServico.show();
-    }
-
-    async function buscarServicoPorNome(nomeDigitado) {
-      try {
-        const resp = await fetch(`${API_BASE}/api/servico`);
-        if (!resp.ok) {
-          throw new Error("Erro ao buscar lista de serviços.");
-        }
-
-        const lista = await resp.json();
-        const nomeNormalizado = nomeDigitado.trim().toLowerCase();
-
-        const encontrados = lista.filter(s =>
-          (s.nomeServico || "").toLowerCase().includes(nomeNormalizado)
-        );
-
-        if (encontrados.length === 0) {
-          throw new Error("Nenhum serviço encontrado com esse nome.");
-        }
-
-        if (encontrados.length > 1) {
-          mostrarAviso(
-            `Foram encontrados ${encontrados.length} serviços. Usando: "${encontrados[0].nomeServico}".`,
-            "erro"
-          );
-        }
-
-        return encontrados[0];
-      } catch (erro) {
-        mostrarAviso(erro.message, "erro");
-        console.error(erro);
-        return null;
-      }
-    }
-
-    async function buscarServicoModal() {
-      const nomeDigitado = document.getElementById("ms-busca").value.trim();
-
-      if (!nomeDigitado) {
-        mostrarAviso("Informe parte do nome do serviço.", "erro");
-        return;
-      }
-
-      const servico = await buscarServicoPorNome(nomeDigitado);
-      if (!servico) return;
-
-      document.getElementById("ms-id-servico").value = servico.id;
-      document.getElementById("ms-nome").value = servico.nomeServico;
-      document.getElementById("ms-codigo").value = servico.codigoDoServico ?? "";
-      document.getElementById("ms-preco").value =
-        (servico.precoUnitario ?? servico.precoServico ?? 0).toFixed(2);
-    }
-
-    function confirmarServico() {
-      const id = document.getElementById("ms-id-servico").value;
-
-      if (!id) {
-        mostrarAviso("Busque e selecione um serviço primeiro.", "erro");
-        return;
-      }
-
-      const nome   = document.getElementById("ms-nome").value;
-      const codigo = document.getElementById("ms-codigo").value;
-      const preco  = parseFloat(document.getElementById("ms-preco").value) || 0;
-      const desc   = parseFloat(document.getElementById("ms-desc").value) || 0;
-
-      const total = preco * (1 - desc / 100);
-
-      servicos.push({
-        id,
-        nome,
-        codigo,
-        preco,
-        desc,
-        total
-      });
-
-      atualizarTabela();
-
-      if (modalServico) modalServico.hide();
-
-      mostrarAviso(`Serviço "${nome}" adicionado à venda.`, "sucesso");
-    }
-
-
-    function normalizarDocumento(doc) {
-      return (doc || "").replace(/\D/g, "");
-    }
-
-    async function buscarListaClientes() {
-      try {
-        const resp = await fetch(`${API_BASE}/api/cliente`);
-        if (!resp.ok) {
-          throw new Error("Erro ao buscar lista de clientes.");
-        }
-        const lista = await resp.json();
-        return Array.isArray(lista) ? lista : [];
-      } catch (erro) {
-        console.error(erro);
-        mostrarAviso("Erro ao buscar lista de clientes.", "erro");
-        return [];
-      }
-    }
-
-    async function buscarClientePorNomeOuCpf(nomeDigitado, cpfDigitado) {
-      const lista = await buscarListaClientes();
-      if (!lista.length) {
-        return null;
-      }
-
-      const cpfNormalizado = normalizarDocumento(cpfDigitado);
-      const nomeNormalizado = (nomeDigitado || "").trim().toLowerCase();
-
-      if (cpfNormalizado) {
-        const encontradosPorDoc = lista.filter(c => {
-          const cpf = normalizarDocumento(c.cpf);
-          const cnpj = normalizarDocumento(c.cnpj);
-          return cpf === cpfNormalizado || cnpj === cpfNormalizado;
-        });
-
-        if (encontradosPorDoc.length === 1) {
-          return encontradosPorDoc[0];
-        }
-        if (encontradosPorDoc.length > 1) {
-          mostrarAviso(
-            `Foram encontrados ${encontradosPorDoc.length} clientes com esse documento. Usando o primeiro.`,
-            "erro"
-          );
-          return encontradosPorDoc[0];
+      function debounce(func, delay) {
+        let timeout = null;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func(...args), delay);
         }
       }
 
-      if (nomeNormalizado) {
-        const encontradosPorNome = lista.filter(c => {
-          const nome = (c.nome || c.razaoSocial || "").toLowerCase();
-          return nome.includes(nomeNormalizado);
-        });
-
-        if (encontradosPorNome.length === 0) {
-          mostrarAviso("Nenhum cliente encontrado com esse nome.", "erro");
-          return null;
-        }
-
-        if (encontradosPorNome.length > 1) {
-          mostrarAviso(
-            `Foram encontrados ${encontradosPorNome.length} clientes com esse nome. Usando: "${encontradosPorNome[0].nome || encontradosPorNome[0].razaoSocial}".`,
-            "erro"
-          );
-        }
-
-        return encontradosPorNome[0];
-      }
-
-      mostrarAviso("Digite nome ou CPF/CNPJ para buscar o cliente.", "erro");
-      return null;
-    }
-
-    async function selecionarCliente() {
+      
       const inputNome = document.getElementById("input-nomeCliente");
-      const inputCpf = document.getElementById("input-cpfCliente");
-      const hiddenId = document.getElementById("input-idCliente");
+      let lista = document.getElementById("listaDeNomesBuscados");
 
-      const nomeDigitado = inputNome.value;
-      const cpfDigitado = inputCpf.value;
+      async function BuscarListaQueContemNomeDigitado(nome) {
+        const inputCpf = document.getElementById("input-cpfCliente");
+        if (!nome) {
+          lista.style.display = "none";
+          lista.innerHTML = "";
+          inputCpf.value = "";
+          return;
+        }
+        try {
+          const resposta = await fetch(API_BASE + "/api/cliente/buscar-clientes-por-nome/" + nome);
+          const dados = await resposta.json();
 
-      if (!nomeDigitado && !cpfDigitado) {
-        mostrarAviso("Informe nome ou CPF/CNPJ para buscar o cliente.", "erro");
-        return;
-      }
-
-      const cliente = await buscarClientePorNomeOuCpf(nomeDigitado, cpfDigitado);
-      if (!cliente) {
-        hiddenId.value = "";
-        return;
-      }
-
-      const displayNome = cliente.nome || cliente.razaoSocial || "";
-      const doc = cliente.cpf || cliente.cnpj || "";
-
-      inputNome.value = displayNome;
-      if (doc) inputCpf.value = doc;
-      hiddenId.value = cliente.id;
-
-      mostrarAviso(`Cliente "${displayNome}" selecionado.`, "sucesso");
-    }
-
-    function removerItem(tipo, index) {
-      if (tipo === "produto") {
-        produtos.splice(index, 1);
-      } else {
-        servicos.splice(index, 1);
-      }
-      atualizarTabela();
-    }
-
-    function atualizarTabela() {
-      const tabelaProdutos = document.querySelector("#tabela-produtos tbody");
-      const tabelaServicos = document.querySelector("#tabela-servicos tbody");
-
-      tabelaProdutos.innerHTML = "";
-      tabelaServicos.innerHTML = "";
-
-      produtos.forEach((p, i) => {
-        tabelaProdutos.innerHTML += `
-          <tr>
-            <td>${p.nome}</td>
-            <td>${p.codigo || "-"}</td>
-            <td>${p.qtd}</td>
-            <td>R$ ${p.preco.toFixed(2)}</td>
-            <td>${p.desc}%</td>
-            <td>R$ ${p.total.toFixed(2)}</td>
-            <td>
-              <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('produto', ${i})">
-                Excluir
-              </button>
-            </td>
-          </tr>`;
-      });
-
-      servicos.forEach((s, i) => {
-        tabelaServicos.innerHTML += `
-          <tr>
-            <td>${s.nome}</td>
-            <td>${s.codigo || "-"}</td>
-            <td>R$ ${s.preco.toFixed(2)}</td>
-            <td>${s.desc}%</td>
-            <td>R$ ${s.total.toFixed(2)}</td>
-            <td>
-              <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('servico', ${i})">
-                Excluir
-              </button>
-            </td>
-          </tr>`;
-      });
-
-      const subtotal =
-        produtos.reduce((sum, p) => sum + p.total, 0) +
-        servicos.reduce((sum, s) => sum + s.total, 0);
-
-      const inputDesconto = document.getElementById("input-desconto");
-      let descontoValor = parseFloat(inputDesconto.value) || 0;
-
-      if (descontoValor < 0) {
-        descontoValor = 0;
-        inputDesconto.value = "0";
-      }
-
-      if (descontoValor > subtotal) {
-        descontoValor = subtotal;
-        inputDesconto.value = subtotal.toFixed(2);
-      }
-
-      const totalComDesconto = subtotal - descontoValor;
-      const totalFinal = Math.max(0, totalComDesconto);
-
-      document.getElementById("valor-total").innerText = totalFinal.toFixed(2);
-    }
-
-    async function finalizarVenda() {
-      const idCliente = document.getElementById("input-idCliente").value.trim();
-      const descontoGeralValor = parseFloat(document.getElementById("input-desconto").value) || 0;
-      const tipoPagamento = parseInt(document.getElementById("tipo-pagamento").value, 10);
-      const meioPagamento = parseInt(document.getElementById("meio-pagamento").value, 10);
-      let parcelas = parseInt(document.getElementById("parcelas").value, 10) || 1;
-
-      if (!idCliente) {
-        mostrarAviso("Selecione/busque um cliente antes de finalizar a venda.", "erro");
-        return;
-      }
-
-      if (produtos.length === 0 && servicos.length === 0) {
-        mostrarAviso("Adicione pelo menos um produto ou serviço à venda.", "erro");
-        return;
-      }
-
-      if (tipoPagamento === 0) {
-        parcelas = 1;
-        document.getElementById("parcelas").value = 1;
-      }
-
-      if (parcelas <= 0) {
-        mostrarAviso("A quantidade de parcelas deve ser pelo menos 1.", "erro");
-        return;
-      }
-
-      const itensVenda = produtos.map(p => ({
-        idProduto: p.id,
-        quantidade: p.qtd,
-        descontoUnitario: p.desc || 0
-      }));
-
-      const servicosVenda = servicos.map(s => ({
-        idServico: s.id,
-        descontoServico: s.desc || 0
-      }));
-
-      const vendaDto = {
-        IdCliente: idCliente,
-        DescontoSobreTotalVenda: descontoGeralValor,
-        ItensVenda: itensVenda,
-        ServicosVenda: servicosVenda
-      };
-
-      const transacaoDto = {
-        TipoPagamento: tipoPagamento,
-        MeioPagamento: meioPagamento,
-        QuantidadeDeParcelas: parcelas
-      };
-
-      const payload = {
-        Venda: vendaDto,
-        Transacao: transacaoDto
-      };
-
-      console.log("JSON que está indo pro backend:");
-      console.log(JSON.stringify(payload, null, 2));
-
-      try {
-        const resp = await fetch(`${API_BASE}/api/venda`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const textoResposta = await resp.text();
-
-        if (!resp.ok) {
-          let msgErro = "Erro ao registrar venda.";
-          try {
-            const json = JSON.parse(textoResposta);
-            if (Array.isArray(json)) {
-              msgErro = json.join(" | ");
-            } else if (typeof json === "string") {
-              msgErro = json;
-            }
-          } catch (e) {
-            if (textoResposta) msgErro = textoResposta;
+          if (!Array.isArray(dados) || dados.length === 0) {
+            const li = document.createElement("li");
+            lista.style.display = "block";
+            li.innerHTML = "Nenhum Registro Encontrado <br>";
+            li.classList.add("li-de-clientes");
+            lista.appendChild(li);
+            return;
           }
-          throw new Error(msgErro);
+
+          lista.innerHTML = "";
+
+          dados.forEach(cliente => {
+            const li = document.createElement("li");
+            let nomeOuRazaoSocial;
+            let cpfOuCnpj;
+            if (cliente.tipoCliente === "PessoaFisica") {
+              nomeOuRazaoSocial = cliente.nome;
+              cpfOuCnpj = cliente.cpf;
+            } else if (cliente.tipoCliente === "PessoaJuridica") {
+              nomeOuRazaoSocial = cliente.razaoSocial;
+              cpfOuCnpj = cliente.cnpj;
+            } else {
+              alert("Tipo de cliente inválido.");
+              return;
+            }
+            lista.style.display = "block";
+            li.innerHTML = nomeOuRazaoSocial + "<br>" + cpfOuCnpj;
+            li.classList.add("li-de-clientes");
+            li.addEventListener("click", () => {
+              idCliente = cliente.id;
+              lista.innerHTML = "";
+              inputNome.value = nomeOuRazaoSocial;
+              inputCpf.value = cpfOuCnpj;
+              lista.style.display = "none";
+            });
+            lista.appendChild(li);
+          });
+        }
+        catch (erro) {
+          mostrarAviso("Erro ao buscar Cliente", "erro");
+        }
+      }
+
+      inputNome.addEventListener("input", debounce(() => {
+        BuscarListaQueContemNomeDigitado(inputNome.value)
+      }, 50));
+
+      inputNome.addEventListener("blur", () => {
+        setTimeout(() => {
+          let lista = document.getElementById("listaDeNomesBuscados");
+          lista.innerHTML = "";
+          lista.style.display = "none";
+        }, 230)
+      });
+
+      inputNome.addEventListener("focus", () => {
+        if (inputNome.value != "") {
+          const func = debounce(() => { BuscarListaQueContemNomeDigitado(inputNome.value) }, 50)
+          func();
+        }
+      });
+
+      inputNome.addEventListener("keydown", (event) => {
+        const inputCpf = document.getElementById("input-cpfCliente");
+        if (event.key === "Backspace" && idCliente != null) {
+          inputCpf.value = "";
+          idCliente = null;
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", inicializarPaginaVenda);
+
+      
+      function abrirModalProduto() {
+        document.getElementById("mp-busca").value = "";
+        document.getElementById("mp-id-produto").value = "";
+        document.getElementById("mp-nome").value = "";
+        document.getElementById("mp-codigo").value = "";
+        document.getElementById("mp-qtd").value = 1;
+        document.getElementById("mp-preco").value = "";
+        document.getElementById("mp-desc").value = 0;
+
+        modalProduto.show();
+      }
+
+      const inputBuscaProduto = document.getElementById("mp-busca");
+      const listaProdutosBuscados = document.getElementById("lista-produtos-buscados");
+
+      async function buscarProdutosDigitando(nome) {
+        if (!nome) {
+          listaProdutosBuscados.style.display = "none";
+          listaProdutosBuscados.innerHTML = "";
+          return;
         }
 
-        let vendaCriada = null;
         try {
-          vendaCriada = JSON.parse(textoResposta);
-        } catch (e) {}
+          const resp = await fetch(`${API_BASE}/api/produto`);
+          if (!resp.ok) {
+            throw new Error("Erro ao buscar produtos.");
+          }
 
-        mostrarAviso("Venda registrada com sucesso!", "sucesso");
-        console.log("Venda criada:", vendaCriada);
+          const dados = await resp.json();
+          listaProdutosBuscados.innerHTML = "";
 
-        produtos = [];
-        servicos = [];
-        atualizarTabela();
-        document.getElementById("input-desconto").value = 0;
-      } catch (erro) {
-        console.error("Erro ao finalizar venda:", erro);
-        mostrarAviso(erro.message, "erro");
+          const termo = nome.trim().toLowerCase();
+
+          const produtosFiltrados = (Array.isArray(dados) ? dados : []).filter(p => {
+            const n = (p.nomeProduto || "").toLowerCase();
+            const cod = (p.codigoDeBarra || "").toLowerCase();
+            return n.includes(termo) || cod.includes(termo);
+          });
+
+          if (produtosFiltrados.length === 0) {
+            const li = document.createElement("li");
+            li.innerHTML = "Nenhum produto encontrado";
+            li.classList.add("li-de-clientes");
+            listaProdutosBuscados.appendChild(li);
+            listaProdutosBuscados.style.display = "block";
+            return;
+          }
+
+          produtosFiltrados.forEach(produto => {
+            const li = document.createElement("li");
+            li.classList.add("li-de-clientes");
+            li.innerHTML = `${produto.nomeProduto}<br>${produto.codigoDeBarra || ""}`;
+
+            li.addEventListener("click", () => {
+              document.getElementById("mp-id-produto").value = produto.id;
+              document.getElementById("mp-nome").value = produto.nomeProduto;
+              document.getElementById("mp-codigo").value = produto.codigoDeBarra || "";
+              document.getElementById("mp-preco").value = (produto.precoUnitario || 0).toFixed(2);
+
+              listaProdutosBuscados.innerHTML = "";
+              listaProdutosBuscados.style.display = "none";
+              inputBuscaProduto.value = produto.nomeProduto;
+            });
+
+            listaProdutosBuscados.appendChild(li);
+          });
+
+          listaProdutosBuscados.style.display = "block";
+        } catch (erro) {
+          console.error(erro);
+          mostrarAviso("Erro ao buscar produtos.", "erro");
+        }
       }
-    }
-  </script>
+
+      inputBuscaProduto.addEventListener(
+        "input",
+        debounce(() => buscarProdutosDigitando(inputBuscaProduto.value), 200)
+      );
+
+      inputBuscaProduto.addEventListener("blur", () => {
+        setTimeout(() => {
+          listaProdutosBuscados.innerHTML = "";
+          listaProdutosBuscados.style.display = "none";
+        }, 200);
+      });
+
+      inputBuscaProduto.addEventListener("focus", () => {
+        if (inputBuscaProduto.value) {
+          const func = debounce(() => buscarProdutosDigitando(inputBuscaProduto.value), 200);
+          func();
+        }
+      });
+
+      
+      function confirmarProduto() {
+        const id = document.getElementById("mp-id-produto").value;
+
+        if (!id) {
+          mostrarAviso("Busque e selecione um produto primeiro.", "erro");
+          return;
+        }
+
+        const nome   = document.getElementById("mp-nome").value;
+        const codigo = document.getElementById("mp-codigo").value;
+        const qtd    = parseInt(document.getElementById("mp-qtd").value, 10) || 0;
+        const preco  = parseFloat((document.getElementById("mp-preco").value || "").replace(",", ".")) || 0;
+        const desc   = parseFloat((document.getElementById("mp-desc").value || "").replace(",", ".")) || 0;
+
+        if (qtd <= 0) {
+          mostrarAviso("Quantidade inválida.", "erro");
+          return;
+        }
+
+        const total = qtd * preco * (1 - desc / 100);
+
+        produtos.push({ id, nome, codigo, qtd, preco, desc, total });
+
+        atualizarTabela();
+        modalProduto.hide();
+      }
+
+      
+      function abrirModalServico() {
+        document.getElementById("ms-busca").value = "";
+        document.getElementById("ms-id-servico").value = "";
+        document.getElementById("ms-nome").value = "";
+        document.getElementById("ms-codigo").value = "";
+        document.getElementById("ms-preco").value = "";
+        document.getElementById("ms-desc").value = 0;
+
+        modalServico.show();
+      }
+
+      const inputBuscaServico = document.getElementById("ms-busca");
+      const listaServicosBuscados = document.getElementById("lista-servicos-buscados");
+
+      async function buscarServicosDigitando(nome) {
+        if (!nome) {
+          listaServicosBuscados.style.display = "none";
+          listaServicosBuscados.innerHTML = "";
+          return;
+        }
+
+        try {
+          const resp = await fetch(`${API_BASE}/api/servico`);
+          if (!resp.ok) {
+            throw new Error("Erro ao buscar serviços.");
+          }
+
+          const dados = await resp.json();
+          listaServicosBuscados.innerHTML = "";
+
+          const termo = nome.trim().toLowerCase();
+
+          const servicosFiltrados = (Array.isArray(dados) ? dados : []).filter(s => {
+            const n = (s.nomeServico || "").toLowerCase();
+            const cod = (s.codigoDoServico || "").toLowerCase();
+            return n.includes(termo) || cod.includes(termo);
+          });
+
+          if (servicosFiltrados.length === 0) {
+            const li = document.createElement("li");
+            li.innerHTML = "Nenhum serviço encontrado";
+            li.classList.add("li-de-clientes");
+            listaServicosBuscados.appendChild(li);
+            listaServicosBuscados.style.display = "block";
+            return;
+          }
+
+          servicosFiltrados.forEach(servico => {
+            const li = document.createElement("li");
+            li.classList.add("li-de-clientes");
+            li.innerHTML = `${servico.nomeServico}<br>${servico.codigoDoServico || ""}`;
+
+            li.addEventListener("click", () => {
+              document.getElementById("ms-id-servico").value = servico.id;
+              document.getElementById("ms-nome").value = servico.nomeServico;
+              document.getElementById("ms-codigo").value = servico.codigoDoServico || "";
+              document.getElementById("ms-preco").value =
+                (servico.precoUnitario ?? servico.precoServico ?? 0).toFixed(2);
+
+              listaServicosBuscados.innerHTML = "";
+              listaServicosBuscados.style.display = "none";
+              inputBuscaServico.value = servico.nomeServico;
+            });
+
+            listaServicosBuscados.appendChild(li);
+          });
+
+          listaServicosBuscados.style.display = "block";
+        } catch (erro) {
+          console.error(erro);
+          mostrarAviso("Erro ao buscar serviços.", "erro");
+        }
+      }
+
+      inputBuscaServico.addEventListener(
+        "input",
+        debounce(() => buscarServicosDigitando(inputBuscaServico.value), 200)
+      );
+
+      inputBuscaServico.addEventListener("blur", () => {
+        setTimeout(() => {
+          listaServicosBuscados.innerHTML = "";
+          listaServicosBuscados.style.display = "none";
+        }, 200);
+      });
+
+      inputBuscaServico.addEventListener("focus", () => {
+        if (inputBuscaServico.value) {
+          const func = debounce(() => buscarServicosDigitando(inputBuscaServico.value), 200);
+          func();
+        }
+      });
+
+      
+      function confirmarServico() {
+        const id = document.getElementById("ms-id-servico").value;
+
+        if (!id) {
+          mostrarAviso("Busque e selecione um serviço primeiro.", "erro");
+          return;
+        }
+
+        const nome   = document.getElementById("ms-nome").value;
+        const codigo = document.getElementById("ms-codigo").value;
+        const preco  = parseFloat((document.getElementById("ms-preco").value || "").replace(",", ".")) || 0;
+        const desc   = parseFloat((document.getElementById("ms-desc").value || "").replace(",", ".")) || 0;
+
+        const total = preco * (1 - desc / 100);
+
+        servicos.push({ id, nome, codigo, preco, desc, total });
+
+        atualizarTabela();
+        modalServico.hide();
+      }
+
+      
+      function removerItem(tipo, index) {
+        if (tipo === "produto") {
+          produtos.splice(index, 1);
+        } else {
+          servicos.splice(index, 1);
+        }
+        atualizarTabela();
+      }
+
+      function atualizarTabela() {
+        const tabelaProdutos = document.querySelector("#tabela-produtos tbody");
+        const tabelaServicos = document.querySelector("#tabela-servicos tbody");
+
+        tabelaProdutos.innerHTML = "";
+        tabelaServicos.innerHTML = "";
+
+        produtos.forEach((p, i) => {
+          tabelaProdutos.innerHTML += `
+            <tr>
+              <td>${p.nome}</td>
+              <td>${p.codigo || "-"}</td>
+              <td>${p.qtd}</td>
+              <td>R$ ${p.preco.toFixed(2)}</td>
+              <td>${p.desc}%</td>
+              <td>R$ ${p.total.toFixed(2)}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('produto', ${i})">
+                  Excluir
+                </button>
+              </td>
+            </tr>`;
+        });
+
+        servicos.forEach((s, i) => {
+          tabelaServicos.innerHTML += `
+            <tr>
+              <td>${s.nome}</td>
+              <td>${s.codigo || "-"}</td>
+              <td>R$ ${s.preco.toFixed(2)}</td>
+              <td>${s.desc}%</td>
+              <td>R$ ${s.total.toFixed(2)}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('servico', ${i})">
+                  Excluir
+                </button>
+              </td>
+            </tr>`;
+        });
+
+        const subtotal =
+          produtos.reduce((sum, p) => sum + p.total, 0) +
+          servicos.reduce((sum, s) => sum + s.total, 0);
+
+        const inputDesconto = document.getElementById("input-desconto");
+        let descontoValor = parseFloat(inputDesconto.value) || 0;
+
+        if (descontoValor < 0) {
+          descontoValor = 0;
+          inputDesconto.value = "0";
+        }
+
+        if (descontoValor > subtotal) {
+          descontoValor = subtotal;
+          inputDesconto.value = subtotal.toFixed(2);
+        }
+
+        const totalComDesconto = subtotal - descontoValor;
+        const totalFinal = Math.max(0, totalComDesconto);
+
+        document.getElementById("valor-total").innerText = totalFinal.toFixed(2);
+      }
+
+      async function finalizarVenda() {
+        const descontoGeralValor = parseFloat(document.getElementById("input-desconto").value) || 0;
+        const tipoPagamento = document.getElementById("tipo-pagamento").value;
+        const meioPagamento = document.getElementById("meio-pagamento").value;
+        let parcelas = parseInt(document.getElementById("parcelas").value, 10) || 1;
+
+        if (!idCliente) {
+          mostrarAviso("Selecione/busque um cliente antes de finalizar a venda.", "erro");
+          return;
+        }
+
+        if (produtos.length === 0 && servicos.length === 0) {
+          mostrarAviso("Adicione pelo menos um produto ou serviço à venda.", "erro");
+          return;
+        }
+
+        if (tipoPagamento === "AVista") {
+          parcelas = 1;
+          const inputParcelas = document.getElementById("parcelas");
+          inputParcelas.value = 1;
+          inputParcelas.disabled = true;
+        }
+
+        if (parcelas <= 0) {
+          mostrarAviso("A quantidade de parcelas deve ser pelo menos 1.", "erro");
+          return;
+        }
+
+        const itensVenda = produtos.map(p => ({
+          idProduto: p.id,
+          quantidade: p.qtd,
+          descontoUnitario: p.desc || 0
+        }));
+
+        const servicosVenda = servicos.map(s => ({
+          idServico: s.id,
+          descontoServico: s.desc || 0
+        }));
+
+        const vendaDto = {
+          IdCliente: idCliente,
+          DescontoSobreTotalVenda: descontoGeralValor,
+          ItensVenda: itensVenda,
+          ServicosVenda: servicosVenda
+        };
+
+        const transacaoDto = {
+          TipoPagamento: tipoPagamento,
+          MeioPagamento: meioPagamento,
+          QuantidadeDeParcelas: parcelas
+        };
+
+        const payload = {
+          Venda: vendaDto,
+          Transacao: transacaoDto
+        };
+
+        console.log("JSON que está indo pro backend:");
+        console.log(JSON.stringify(payload, null, 2));
+
+        try {
+          const resp = await fetch(`${API_BASE}/api/venda`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          const textoResposta = await resp.text();
+
+          if (!resp.ok) {
+            let msgErro = "Erro ao registrar venda.";
+            try {
+              const json = JSON.parse(textoResposta);
+              if (Array.isArray(json)) {
+                msgErro = json.join(" | ");
+              } else if (typeof json === "string") {
+                msgErro = json;
+              }
+            } catch (e) {
+              if (textoResposta) msgErro = textoResposta;
+            }
+            throw new Error(msgErro);
+          }
+
+          let vendaCriada = null;
+          try {
+            vendaCriada = JSON.parse(textoResposta);
+          } catch (e) {}
+
+          mostrarAviso("Venda registrada com sucesso!", "sucesso");
+          console.log("Venda criada:", vendaCriada);
+
+          produtos = [];
+          servicos = [];
+          atualizarTabela();
+          document.getElementById("input-desconto").value = 0;
+
+          setTimeout(() => {
+            window.location.href = "./buscar_vendas.html";
+          }, 1900);
+
+        } catch (erro) {
+          console.error("Erro ao finalizar venda:", erro);
+          mostrarAviso(erro.message, "erro");
+        }
+      }
+    </script>
+
 </body>
 </html>

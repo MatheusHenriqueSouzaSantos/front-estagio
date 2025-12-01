@@ -11,7 +11,7 @@
   <body>
     <div class="barra-horizontal">
       <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
           <a class="navbar-brand" href="home.html">Home</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
             <span class="navbar-toggler-icon"></span>
@@ -31,6 +31,7 @@
               </li>
             </ul>
           </div>
+          <img class="img-logo" src="./resources/ImagemLogoEmpresaParaEstagio.png" alt="logo da empresa">
         </div>
       </nav>
 
@@ -58,7 +59,7 @@
 
                 <div class="mb-3">
                   <label for="input-precoServico" class="form-label">Preço (R$): <span style="color: red;">*</span></label>
-                  <input type="number" class="form-control" id="input-precoServico" required />
+                  <input type="number" step="0.01" min="0" class="form-control" id="input-precoServico" required />
                 </div>
 
                 <button type="submit" class="btn btn-primary botao-cadastrar">Cadastrar Serviço</button>
@@ -107,6 +108,9 @@
           .then((response) => {
             if (!response.ok) throw new Error("Erro no envio");
             mostrarAviso("Serviço cadastrado com sucesso!", "sucesso");
+            setTimeout(()=>{
+          window.location.href="./buscar_serviços.html"
+        },1500)
           })
           .catch(() => mostrarAviso("Erro no envio de dados", "erro"));
       }

@@ -7,7 +7,7 @@ body {
 
 
 .bg-custom {
-  background-color: #ffffff !important; /* azul acinzentado */
+  background-color: #ffffff !important; 
 }
 
 .navbar .nav-link,
@@ -39,7 +39,9 @@ body {
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
   border: 1px solid #ccc;
   width: 100%;
-  max-width: 900px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
   z-index: 999;
 }
 
@@ -83,4 +85,9 @@ table {
 
 .dropdown-menu {
   z-index: 2000 !important;
+}
+
+.img-logo{
+  width: 5%;
+  padding-right: 1%;
 }

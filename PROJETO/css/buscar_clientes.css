@@ -3,16 +3,25 @@ body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-
+/* Caixa principal */
 .form-box {
+  overflow-y: auto;
+  margin: 2rem auto;
   background: #fff;
-  padding: 2rem;
+  padding: 2rem 2.5rem;
   border-radius: 1rem;
-  box-shadow: 0 4px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
   border: 1px solid #ccc;
   width: 100%;
-  max-width: 950px;
-  margin: 0 auto;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 999;
+}
+
+
+.container {
+  max-width: 100vw !important;
 }
 
 
@@ -25,6 +34,10 @@ body {
 .table thead {
   background-color: #e9ecef;
   font-weight: 600;
+}
+
+.table td {
+  overflow-wrap: break-word;
 }
 
 
@@ -62,7 +75,34 @@ body {
   font-weight: 500;
 }
 
-.navbar .dropdown-menu .dropdown-item.active {
-  background-color: #198754;
-  color: white;
+.img-logo {
+  width: 5%;
+  padding-right: 1%;
 }
+
+.campo-para-busca{
+  margin-bottom: 3%;
+}
+.div-envolvendo-titulo-e-campo-busca{
+  display: flex;
+  justify-content: space-between;
+}
+#input-buscar-clientes-por-nome{
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 5px;
+  height:4vh;
+  width: 75%;
+}
+.botao-buscar{
+  background-color: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  height: 4vh;
+  width: 23%;
+}
+.titulo{
+  padding-top: 1%;
+}
+
+
