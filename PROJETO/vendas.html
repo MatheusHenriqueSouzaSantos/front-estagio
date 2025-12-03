@@ -179,7 +179,9 @@
         <div class="mb-2">
           <label class="form-label">Quantidade</label>
           <input type="number" id="mp-qtd" class="form-control" value="1" min="1">
+          <div class="form-text" id="mp-estoque-atual">Estoque atual: —</div>
         </div>
+
 
         <div class="mb-2">
           <label class="form-label">Preço Unitário (R$)</label>
@@ -418,6 +420,9 @@
         document.getElementById("mp-preco").value = "";
         document.getElementById("mp-desc").value = 0;
 
+        const divEstoque = document.getElementById("mp-estoque-atual");
+        if (divEstoque) divEstoque.textContent = "Estoque atual: —";
+
         modalProduto.show();
       }
 
@@ -467,6 +472,12 @@
               document.getElementById("mp-nome").value = produto.nomeProduto;
               document.getElementById("mp-codigo").value = produto.codigoDeBarra || "";
               document.getElementById("mp-preco").value = (produto.precoUnitario || 0).toFixed(2);
+
+              const divEstoque = document.getElementById("mp-estoque-atual");
+              if (divEstoque) {
+                const estoque = produto.quantidadeEmEstoque ?? 0;
+                divEstoque.textContent = `Estoque atual: ${estoque}`;
+              }
 
               listaProdutosBuscados.innerHTML = "";
               listaProdutosBuscados.style.display = "none";
