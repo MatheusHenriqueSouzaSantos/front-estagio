@@ -107,7 +107,7 @@
         })
           .then((response) => {
             if (!response.ok) throw new Error("Erro no envio");
-            mostrarAviso("Serviço cadastrado com sucesso!", "sucesso");
+            mostrarAviso("Serviço cadastrado", "sucesso");
             setTimeout(()=>{
           window.location.href="./buscar_serviços.html"
         },1500)

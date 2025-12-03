@@ -9,6 +9,7 @@
 </head>
 
 <body>
+  
   <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <a class="navbar-brand" href="home.html">Home</a>
@@ -19,9 +20,7 @@
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle mt-1" href="#" role="button" data-bs-toggle="dropdown">
-              Menu
-            </a>
+            <a class="nav-link dropdown-toggle mt-1" href="#" role="button" data-bs-toggle="dropdown">Menu</a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item active" href="buscar_clientes.html">Clientes</a></li>
               <li><a class="dropdown-item" href="buscar_produtos.html">Produtos</a></li>
@@ -39,7 +38,6 @@
   <div class="container-fluid mt-5">
     <div class="form-box">
 
-      
       <div class="d-flex justify-content-between align-items-end flex-wrap mb-4 gap-3">
         <h2 class="mb-0">Lista de Clientes</h2>
 
@@ -48,38 +46,35 @@
             type="text"
             id="input-buscar-clientes-por-nome"
             class="form-control"
-            placeholder="Buscar por Nome / Razão Social"
+            placeholder="Buscar por Nome ou CPF"
           >
-          <button class="btn btn-primary" onclick="buscarPorNome()">Buscar</button>
+          <button class="btn btn-primary" onclick="buscarClientes()">Buscar</button>
         </div>
       </div>
 
       <table class="table table-striped align-middle text-start">
-      <thead class="table-secondary text-center">
-        <tr>
-          <th>Tipo</th>
-          <th>Nome / Razão Social</th>
-          <th>CPF / CNPJ</th>
-          <th>Nome Fantasia</th>
-          <th>Inscrição Estadual</th>
-          <th>Telefone</th>
-          <th>Email</th>
-          <th>Cidade</th>
-          <th>UF</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-
-      <tbody id="tabela-clientes">
-        <tr><td colspan="10" class="text-muted">Carregando clientes...</td></tr>
-      </tbody>
-    </table>
+        <thead class="table-secondary text-center">
+          <tr>
+            <th>Tipo</th>
+            <th>Nome / Razão Social</th>
+            <th style="text-align: right; padding-right: 12px;">CPF / CNPJ</th>
+            <th>Email</th>
+            <th>Nome Fantasia</th>
+            <th>Inscrição Estadual</th>
+            <th>Telefone</th>
+            <th>Cidade</th>
+            <th>UF</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-clientes">
+          <tr><td colspan="10" class="text-muted text-center">Carregando clientes...</td></tr>
+        </tbody>
+      </table>
 
       <a href="cadastro.html" 
          class="btn btn-success position-fixed bottom-0 end-0 m-4 rounded-circle shadow"
-         style="width: 60px; height: 60px; font-size: 28px; display: flex; align-items: center; justify-content: center;">
-         +
-      </a>
+         style="width: 60px; height: 60px; font-size: 28px; display: flex; align-items: center; justify-content: center;">+</a>
     </div>
   </div>
 
@@ -90,7 +85,7 @@
           <h5 class="modal-title">Confirmar exclusão</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" id="texto-modal-exclusao">
           Deseja excluir este cliente?
         </div>
         <div class="modal-footer">
@@ -105,115 +100,171 @@
 
   <script>
     const API_URL = "https://localhost:7036/api/cliente";
-    const API_URL_POR_NOME = "https://localhost:7036/api/cliente/buscar-clientes-por-nome/";
+    const API_URL_POR_NOME = API_URL + "/buscar-clientes-por-nome/";
+    const API_URL_DOCUMENTO = API_URL + "/buscar-cliente-por-documento-indentificador";
 
-    let idParaExcluir = null;
+    let filtroAtual = "";
     let modalExcluir = null;
-    let filtroNomeAtual = ""; 
+    let idParaExcluir = null;
 
-    function formatarCpf(valor) {
-      if (!valor) return "-";
-      const v = valor.toString().replace(/\D/g, "").slice(0, 11);
-      if (v.length !== 11) return valor; 
-      return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    function formatarCpf(v) {
+      if (!v) return "-";
+      v = v.replace(/\D/g, "");
+      return v.length === 11 ? v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : v;
     }
 
-    function formatarCnpj(valor) {
-      if (!valor) return "-";
-      const v = valor.toString().replace(/\D/g, "").slice(0, 14);
-      if (v.length !== 14) return valor;
-      return v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+    function formatarCnpj(v) {
+      if (!v) return "-";
+      v = v.replace(/\D/g, "");
+      return v.length === 14 ? v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5") : v;
     }
 
-    function formatarTelefone(valor) {
-      if (!valor) return "-";
-      const v = valor.toString().replace(/\D/g, "");
-      if (v.length === 10) {
-        return v.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-      }
-      if (v.length === 11) {
-        return v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-      }
-      return valor; 
+    function formatarTelefone(v) {
+      if (!v) return "-";
+      v = v.replace(/\D/g, "");
+      if (v.length === 10) return v.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+      if (v.length === 11) return v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      return v;
     }
 
-    async function carregarClientes(nomeFiltro = "") {
+    function preencherTabela(clientes) {
       const tabela = document.getElementById("tabela-clientes");
-      tabela.innerHTML = `<tr><td colspan="10" class="text-muted">Carregando...</td></tr>`;
+      tabela.innerHTML = "";
 
-      try {
-        let url = API_URL;
+      if (!clientes || clientes.length === 0) {
+        tabela.innerHTML = `<tr><td colspan="10" class="text-center text-muted">Nenhum cliente encontrado.</td></tr>`;
+        return;
+      }
 
-        if (nomeFiltro.trim() !== "") {
-          url = API_URL_POR_NOME + encodeURIComponent(nomeFiltro.trim());
-        }
-
-        const resposta = await fetch(url, { method: 'GET' });
-
-        if (!resposta.ok) {
-          tabela.innerHTML = `<tr><td colspan="10" class="text-danger">Erro ${resposta.status}</td></tr>`;
-          return;
-        }
-
-        const clientes = await resposta.json();
-        tabela.innerHTML = "";
-
-        if (!Array.isArray(clientes) || clientes.length === 0) {
-          tabela.innerHTML = `<tr><td colspan="10" class="text-muted">Nenhum cliente encontrado.</td></tr>`;
-          return;
-        }
-
-        clientes.forEach(c => {
-
-        const tipo = c.tipoCliente === "PessoaFisica" ? "Física" : "Jurídica";
-
-        const nome = c.tipoCliente === "PessoaFisica" ? c.nome : c.razaoSocial;
-
-        const rawDoc = c.tipoCliente === "PessoaFisica" ? c.cpf : c.cnpj;
-        const doc    = c.tipoCliente === "PessoaFisica" ? formatarCpf(rawDoc) : formatarCnpj(rawDoc);
-
-        const tel = formatarTelefone(c.telefone);
+      clientes.forEach(c => {
+        const tipo   = c.tipoCliente === "PessoaFisica" ? "Física" : "Jurídica";
+        const nome   = c.tipoCliente === "PessoaFisica" ? c.nome : c.razaoSocial;
+        const docRaw = c.tipoCliente === "PessoaFisica" ? c.cpf : c.cnpj;
+        const doc    = c.tipoCliente === "PessoaFisica" ? formatarCpf(docRaw) : formatarCnpj(docRaw);
 
         const linha = `
           <tr>
             <td>${tipo}</td>
             <td>${nome}</td>
-            <td>${doc}</td>
-            <td>${c.nomeFantasia || "-"}</td>
-            <td>${c.inscricaoEstadual || "-"}</td>
-            <td>${tel}</td>
+            <td style="text-align: right; padding-right: 12px;">${doc}</td>
             <td>${c.email}</td>
+            <td>${c.nomeFantasia || "-"}</td>
+            <td style="text-align: right; padding-right: 12px;">${c.inscricaoEstadual || "-"}</td>
+            <td>${formatarTelefone(c.telefone)}</td>
             <td>${c.endereco?.cidade || "-"}</td>
             <td>${c.endereco?.siglaUf || "-"}</td>
             <td>
               <button class="btn btn-warning btn-sm" onclick="editarCliente('${c.id}')">Editar</button>
-              <button class="btn btn-danger btn-sm" onclick="abrirModalExclusao('${c.id}')">Excluir</button>
+              <button class="btn btn-danger btn-sm" onclick="abrirModalExclusao('${c.id}', ${c.podeExcluir})">Excluir</button>
             </td>
           </tr>
         `;
-
         tabela.innerHTML += linha;
       });
+    }
 
+    async function buscarClientes() {
+      const termo = document.getElementById("input-buscar-clientes-por-nome").value.trim();
+      filtroAtual = termo;
 
-      } catch (erro) {
+      const tabela = document.getElementById("tabela-clientes");
+      tabela.innerHTML = `<tr><td colspan="10" class="text-center text-muted">Buscando...</td></tr>`;
+
+      if (termo === "") {
+        carregarClientes();
+        return;
+      }
+
+      const somenteNumeros = termo.replace(/\D/g, "");
+
+      try {
+        if (somenteNumeros.length === 11) {
+          const body = {
+            tipoDocumento: "Cpf",
+            numeroDocumento: somenteNumeros
+          };
+
+          const resp = await fetch(API_URL_DOCUMENTO, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+
+          if (resp.ok) {
+            const dados = await resp.json();
+            preencherTabela(Array.isArray(dados) ? dados : [dados]);
+            return;
+          }
+        }
+
+        if (somenteNumeros.length === 14) {
+          const body = {
+            tipoDocumento: "Cnpj",
+            numeroDocumento: somenteNumeros
+          };
+
+          const resp = await fetch(API_URL_DOCUMENTO, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+
+          if (resp.ok) {
+            const dados = await resp.json();
+            preencherTabela(Array.isArray(dados) ? dados : [dados]);
+            return;
+          }
+        }
+
+        const respNome = await fetch(API_URL_POR_NOME + encodeURIComponent(termo));
+
+        if (respNome.ok) {
+          const dados = await respNome.json();
+          preencherTabela(dados);
+          return;
+        }
+
+        tabela.innerHTML = `<tr><td colspan="10" class="text-center text-muted">Nenhum resultado encontrado.</td></tr>`;
+      } 
+      catch (erro) {
         tabela.innerHTML = `<tr><td colspan="10" class="text-danger">Erro: ${erro.message}</td></tr>`;
       }
     }
 
-    function buscarPorNome() {
-      const nome = document.getElementById("input-buscar-clientes-por-nome").value;
-      filtroNomeAtual = nome;         
-      carregarClientes(nome);         
+    async function carregarClientes() {
+      const tabela = document.getElementById("tabela-clientes");
+      tabela.innerHTML = `<tr><td colspan="10" class="text-muted text-center">Carregando...</td></tr>`;
+
+      try {
+        const resposta = await fetch(API_URL);
+        const dados = await resposta.json();
+        preencherTabela(dados);
+      } catch (erro) {
+        tabela.innerHTML = `<tr><td colspan="10" class="text-danger">Erro ao carregar: ${erro.message}</td></tr>`;
+      }
     }
 
-    function abrirModalExclusao(id) {
-      idParaExcluir = id;
+    function abrirModalExclusao(id, podeExcluir) {
+      const modalElement = document.getElementById("modalExcluirCliente");
+      const modalBody = document.getElementById("texto-modal-exclusao");
+      const btnConfirmar = document.getElementById("btn-confirmar-exclusao");
 
-      if (!modalExcluir) {
-        modalExcluir = new bootstrap.Modal(document.getElementById("modalExcluirCliente"));
+      const podeExcluirDeFato = (podeExcluir !== false);
+
+      if (podeExcluirDeFato) {
+        idParaExcluir = id;
+        modalBody.textContent = "Deseja excluir este cliente?";
+        btnConfirmar.classList.remove("d-none");
+        btnConfirmar.disabled = false;
+      } else {
+        idParaExcluir = null;
+        modalBody.textContent = "O cliente está registrado em uma venda, não é possível excluir.";
+        btnConfirmar.classList.add("d-none");
       }
 
+      if (!modalExcluir) {
+        modalExcluir = new bootstrap.Modal(modalElement);
+      }
       modalExcluir.show();
     }
 
@@ -221,16 +272,13 @@
       if (!idParaExcluir) return;
 
       try {
-        const resposta = await fetch(`${API_URL}/${idParaExcluir}`, { method: "DELETE" });
-
-        if (resposta.ok) {
-          carregarClientes(filtroNomeAtual);
-        } else {
-          console.error("Erro ao excluir cliente:", resposta.statusText);
-        }
-      } catch (e) {
-        console.error("Erro servidor:", e.message);
-      } finally {
+        const resp = await fetch(`${API_URL}/${idParaExcluir}`, { method: "DELETE" });
+        if (resp.ok) carregarClientes(filtroAtual);
+      } 
+      catch (e) {
+        console.error("Erro ao excluir:", e.message);
+      }
+      finally {
         if (modalExcluir) modalExcluir.hide();
         idParaExcluir = null;
       }
@@ -242,8 +290,9 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("btn-confirmar-exclusao").addEventListener("click", excluirCliente);
-      carregarClientes(); 
+      carregarClientes();
     });
   </script>
+
 </body>
 </html>

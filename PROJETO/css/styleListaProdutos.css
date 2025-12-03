@@ -91,3 +91,7 @@ table {
   width: 5%;
   padding-right: 1%;
 }
+.td-nome {
+  text-align: left;
+  padding-left: 1100px; 
+}

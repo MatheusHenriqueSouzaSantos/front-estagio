@@ -35,7 +35,7 @@ body {
   background-color: #3b3b3b;
   color: #fff;
 }
-.div-gerar-relatorio-vendas-por-periodo{
+.div-relatorios{
   background-color: #ececec;
   z-index: 10;
   width: 37%;
@@ -50,7 +50,7 @@ body {
   display: none;
 }
 
-.botao-gerar-relatorio{
+#botao-gerar-relatorio-vendas-por-periodo{
   background-color: #0d6efd ;
   border: none;
   width: 25%;
@@ -59,6 +59,32 @@ body {
   top: 18%;
   left: 72%;
   border-radius: 15px;
+}
+#botao-gerar-relatorio-produtos-com-maior-faturamento-por-periodo{
+  background-color: #0d6efd ;
+  border: none;
+  width: 25%;
+  height: 13%;
+  position: relative;
+  top: 8%;
+  left: 72%;
+  border-radius: 15px;
+}
+#botao-gerar-relatorio-produtos-em-falta{
+  background-color: #0d6efd ;
+  border: none;
+  width: 25%;
+  height: 13%;
+  position: relative;
+  top: 26%;
+  left: 72%;
+  border-radius: 15px;
+}
+
+#labe-quantidade-produtos-em-falta{
+  margin-top: 2%;
+  width: 90%;
+  margin-left: 15px;
 }
 
 .form-control {
@@ -81,4 +107,47 @@ label{
 .img-logo{
   width: 5%;
   padding-right: 1%;
+}
+
+.div-aviso{
+    position: fixed;
+    width: 32%;
+    height: 33vh;
+    z-index:12 !important;
+    left: 34%;
+    top: 150%;
+    border-radius: 1rem;
+    color: white;
+    transition: top 2s ease;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.div-aviso-subir{
+   top: 28% ;
+}
+.sucesso{
+    background-color: #4caf50;
+    opacity: 0.8;
+}
+.erro{
+    background-color: #f44336;
+    opacity: 0.8;
+}
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
+  margin-top: auto;
+}
+html, body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.container, .container-fluid {
+  flex: 1;
 }

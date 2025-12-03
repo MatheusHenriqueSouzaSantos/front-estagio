@@ -40,7 +40,6 @@ body {
 .dropdown-menu {
   z-index: 3 !important;
 }
-/*transform*/
 .div-aviso{
     position: fixed;
     width: 32%;
