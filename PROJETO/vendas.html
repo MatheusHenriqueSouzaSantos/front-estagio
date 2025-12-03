@@ -258,6 +258,7 @@
       let modalProduto;
       let modalServico;
       let idCliente;
+      let estoqueAtualProduto = null;
 
       
       function mostrarAviso(mensagem, tipo) {
@@ -420,6 +421,10 @@
         document.getElementById("mp-preco").value = "";
         document.getElementById("mp-desc").value = 0;
 
+        estoqueAtualProduto = null;
+        const inputQtd = document.getElementById("mp-qtd");
+        inputQtd.removeAttribute("max");
+
         const divEstoque = document.getElementById("mp-estoque-atual");
         if (divEstoque) divEstoque.textContent = "Estoque atual: —";
 
@@ -474,9 +479,15 @@
               document.getElementById("mp-preco").value = (produto.precoUnitario || 0).toFixed(2);
 
               const divEstoque = document.getElementById("mp-estoque-atual");
+              const inputQtd = document.getElementById("mp-qtd");
+              estoqueAtualProduto = produto.quantidadeEmEstoque ?? 0;
+
               if (divEstoque) {
-                const estoque = produto.quantidadeEmEstoque ?? 0;
-                divEstoque.textContent = `Estoque atual: ${estoque}`;
+                divEstoque.textContent = `Estoque atual: ${estoqueAtualProduto}`;
+              }
+
+              if (inputQtd) {
+                inputQtd.max = estoqueAtualProduto > 0 ? estoqueAtualProduto : 1;
               }
 
               listaProdutosBuscados.innerHTML = "";
@@ -530,6 +541,14 @@
 
         if (qtd <= 0) {
           mostrarAviso("Quantidade inválida.", "erro");
+          return;
+        }
+
+        if (estoqueAtualProduto != null && qtd > estoqueAtualProduto) {
+          mostrarAviso(
+            `Quantidade solicitada (${qtd}) maior que o estoque atual (${estoqueAtualProduto}).`,
+            "erro"
+          );
           return;
         }
 

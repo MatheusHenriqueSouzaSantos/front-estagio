@@ -79,7 +79,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow">
         <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title">Confirmar exclusão</h5>
+          <h5 class="modal-title" id="modal-titulo-exclusao-servico">Confirmar exclusão</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body" id="texto-modal-exclusao-servico">
@@ -226,29 +226,36 @@
     }
 
     function abrirModalExclusao(id, podeExcluir) {
-      const modalEl = document.getElementById("modalExcluirServico");
-      const modalBody = document.getElementById("texto-modal-exclusao-servico");
-      const btnConfirmar = document.getElementById("btn-confirmar-exclusao");
+        const modalEl     = document.getElementById("modalExcluirServico");
+        const modalBody   = document.getElementById("texto-modal-exclusao-servico");
+        const modalTitulo = document.getElementById("modal-titulo-exclusao-servico");
+        const btnConfirmar = document.getElementById("btn-confirmar-exclusao");
 
-      const podeExcluirDeFato = (podeExcluir !== false);
+        const podeExcluirDeFato = (podeExcluir !== false);
 
-      if (podeExcluirDeFato) {
-        idServicoParaExcluir = id;
-        modalBody.textContent = "Deseja excluir este serviço?";
-        btnConfirmar.classList.remove("d-none");
-        btnConfirmar.disabled = false;
-      } else {
-        idServicoParaExcluir = null;
-        modalBody.textContent = "O serviço está registrado em uma venda, não é possível excluir.";
-        btnConfirmar.classList.add("d-none");
+        if (podeExcluirDeFato) {
+          idServicoParaExcluir = id;
+
+          modalTitulo.textContent = "Confirmar exclusão";
+          modalBody.textContent   = "Deseja excluir este serviço?";
+
+          btnConfirmar.classList.remove("d-none");
+          btnConfirmar.disabled = false;
+        } else {
+          idServicoParaExcluir = null;
+
+          modalTitulo.textContent = "Não é possível excluir";
+          modalBody.textContent   = "O serviço está registrado em uma venda e não pode ser excluído.";
+
+          btnConfirmar.classList.add("d-none");
+        }
+
+        if (!modalExcluir) {
+          modalExcluir = new bootstrap.Modal(modalEl);
+        }
+
+        modalExcluir.show();
       }
-
-      if (!modalExcluir) {
-        modalExcluir = new bootstrap.Modal(modalEl);
-      }
-
-      modalExcluir.show();
-    }
 
     async function excluirServico() {
       if (!idServicoParaExcluir) return;
