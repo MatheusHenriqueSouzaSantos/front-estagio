@@ -73,7 +73,7 @@
                 <th>Código</th>
                 <th>Qtd</th>
                 <th>Preço Unit. na Venda</th>
-                <th>Desconto Unit. (%)</th>
+                <th>Desconto Unit. (R$)</th>
                 <th>Total (R$)</th>
               </tr>
             </thead>
@@ -93,7 +93,7 @@
                 <th>Serviço</th>
                 <th>Código</th>
                 <th>Preço na Venda</th>
-                <th>Desconto (%)</th>
+                <th>Desconto (R$)</th>
                 <th>Total (R$)</th>
               </tr>
             </thead>
@@ -200,7 +200,7 @@
         const qtd = item.quantidade ?? 0;
         const precoNaVenda = item.precoUnitarioDoProdutoNaVenda ?? produto.precoUnitario ?? 0;
         const desc = item.descontoUnitario ?? 0;
-        const total = qtd * precoNaVenda * (1 - desc / 100);
+        const total = qtd * (precoNaVenda-desc);
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -208,7 +208,7 @@
           <td>${codigo}</td>
           <td>${qtd}</td>
           <td>R$ ${precoNaVenda.toFixed(2)}</td>
-          <td>${desc}%</td>
+          <td>R$ ${desc.toFixed(2)}</td>
           <td>R$ ${total.toFixed(2)}</td>
         `;
         tbody.appendChild(tr);
@@ -230,14 +230,14 @@
         const codigo = servico.codigoDoServico || "—";
         const precoNaVenda = item.precoServicoNaVenda ?? servico.precoUnitario ?? servico.precoServico ?? 0;
         const desc = item.descontoServico ?? 0;
-        const total = precoNaVenda * (1 - desc / 100);
+        const total = precoNaVenda-desc
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${nome}</td>
           <td>${codigo}</td>
           <td>R$ ${precoNaVenda.toFixed(2)}</td>
-          <td>${desc}%</td>
+          <td>R$ ${desc.toFixed(2)}</td>
           <td>R$ ${total.toFixed(2)}</td>
         `;
         tbody.appendChild(tr);

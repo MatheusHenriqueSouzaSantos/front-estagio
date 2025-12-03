@@ -189,8 +189,9 @@
         </div>
 
         <div class="mb-2">
-          <label class="form-label">Desconto Unitário (%)</label>
+          <label class="form-label">Desconto Unitário (R$)</label>
           <input type="number" id="mp-desc" class="form-control" min="0" value="0">
+          <span id="span-desconto-unitario-invalido" style="color: red;display: none;">O Desconto por unidade não pode ser maior que o valor do produto</span>
         </div>
 
         <div class="text-end mt-3">
@@ -234,9 +235,12 @@
         </div>
 
         <div class="mb-2">
-          <label class="form-label">Desconto (%)</label>
+          <label class="form-label">Desconto (R$)</label>
           <input type="number" id="ms-desc" class="form-control" min="0" value="0">
+          <span id="span-desconto-servico-invalido" style="color: red;display: none;">O Desconto do serviço não pode ser maior do que o valor do serviço</span>       
         </div>
+
+        
 
         <div class="text-end mt-3">
           <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
@@ -524,6 +528,10 @@
         }
       });
 
+      document.getElementById("mp-desc").addEventListener("focus",()=>{
+        document.getElementById("span-desconto-unitario-invalido").style.display="none"
+      })
+
       
       function confirmarProduto() {
         const id = document.getElementById("mp-id-produto").value;
@@ -544,6 +552,11 @@
           return;
         }
 
+        if(desc>preco){
+          document.getElementById("span-desconto-unitario-invalido").style.display="inline"
+          return
+        }
+
         if (estoqueAtualProduto != null && qtd > estoqueAtualProduto) {
           mostrarAviso(
             `Quantidade solicitada (${qtd}) maior que o estoque atual (${estoqueAtualProduto}).`,
@@ -552,7 +565,7 @@
           return;
         }
 
-        const total = qtd * preco * (1 - desc / 100);
+        const total = qtd * (preco-desc);
 
         produtos.push({ id, nome, codigo, qtd, preco, desc, total });
 
@@ -654,6 +667,9 @@
         }
       });
 
+      document.getElementById("ms-desc").addEventListener("focus",()=>{
+        document.getElementById("span-desconto-servico-invalido").style.display="none"
+      });
       
       function confirmarServico() {
         const id = document.getElementById("ms-id-servico").value;
@@ -667,8 +683,12 @@
         const codigo = document.getElementById("ms-codigo").value;
         const preco  = parseFloat((document.getElementById("ms-preco").value || "").replace(",", ".")) || 0;
         const desc   = parseFloat((document.getElementById("ms-desc").value || "").replace(",", ".")) || 0;
+        if(desc>preco){
+          document.getElementById("span-desconto-servico-invalido").style.display="inline"
+          return
+        }
 
-        const total = preco * (1 - desc / 100);
+        const total = preco-desc;
 
         servicos.push({ id, nome, codigo, preco, desc, total });
 
@@ -700,7 +720,7 @@
               <td>${p.codigo || "-"}</td>
               <td>${p.qtd}</td>
               <td>R$ ${p.preco.toFixed(2)}</td>
-              <td>${p.desc}%</td>
+              <td>R$ ${p.desc.toFixed(2)}</td>
               <td>R$ ${p.total.toFixed(2)}</td>
               <td>
                 <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('produto', ${i})">
@@ -716,7 +736,7 @@
               <td>${s.nome}</td>
               <td>${s.codigo || "-"}</td>
               <td>R$ ${s.preco.toFixed(2)}</td>
-              <td>${s.desc}%</td>
+              <td>R$ ${s.desc.toFixed(2)}</td>
               <td>R$ ${s.total.toFixed(2)}</td>
               <td>
                 <button class="btn btn-danger btn-sm" type="button" onclick="removerItem('servico', ${i})">

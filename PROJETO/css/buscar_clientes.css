@@ -87,12 +87,7 @@ body {
   display: flex;
   justify-content: space-between;
 }
-#input-buscar-clientes-por-nome{
-  border: 1px solid rgba(0,0,0,0.3);
-  border-radius: 5px;
-  height:4vh;
-  width: 75%;
-}
+
 .botao-buscar{
   background-color: #0d6efd;
   color: #fff;
