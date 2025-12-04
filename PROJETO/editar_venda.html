@@ -178,7 +178,7 @@
       </div>
 
       <div class="mb-2">
-        <label class="form-label">Desconto Unitário (%)</label>
+        <label class="form-label">Desconto Unitário (R$)</label>
         <input type="number" id="mp-desc" class="form-control" min="0" value="0">
       </div>
 
@@ -221,7 +221,7 @@
       </div>
 
       <div class="mb-2">
-        <label class="form-label">Desconto (%)</label>
+        <label class="form-label">Desconto (R$)</label>
         <input type="number" id="ms-desc" class="form-control" min="0" value="0">
       </div>
 
@@ -349,7 +349,7 @@
 
       inputCpfCnpj.value = cpfCnpj;
 
-      const descontoGeral = venda.descontoSobreTotalVenda ?? venda.desconto ?? 0;
+      const descontoGeral = venda.descontoTotalVenda ?? venda.desconto ?? 0;
       document.getElementById("input-desconto-geral").value = descontoGeral;
 
       itens = (venda.itensVenda || []).map(x => {
@@ -382,7 +382,7 @@
         transacao.meioPagamento || "Dinheiro";
 
       document.getElementById("input-parcelas").value =
-        transacao.numeroDeParcelas ?? 1;
+        transacao.numeroDeParcelasNaoPagas ?? 1;
 
       atualizarTabela();
       atualizarParcelasPorTipo();
@@ -407,7 +407,7 @@
         const qtd = Number(p.qtd) || 0;
         const desc = Number(p.desc) || 0;
 
-        const totalItem = preco * qtd * (1 - desc / 100);
+        const totalItem = (preco-desc)*qtd
         totalGeral += totalItem;
 
         tbp.innerHTML += `
@@ -416,7 +416,7 @@
             <td>${p.codigo}</td>
             <td>${qtd}</td>
             <td>R$ ${preco.toFixed(2)}</td>
-            <td>${desc}%</td>
+            <td>R$ ${desc.toFixed(2)}</td>
             <td>R$ ${totalItem.toFixed(2)}</td>
             <td><button class="btn btn-danger btn-sm" onclick="removerItem('p', ${i})">Remover</button></td>
           </tr>`;
@@ -426,7 +426,7 @@
         const preco = Number(s.preco) || 0;
         const desc = Number(s.desc) || 0;
 
-        const totalServ = preco * (1 - desc / 100);
+        const totalServ = preco-desc;
         totalGeral += totalServ;
 
         tbs.innerHTML += `
@@ -434,7 +434,7 @@
             <td>${s.nome}</td>
             <td>${s.codigo}</td>
             <td>R$ ${preco.toFixed(2)}</td>
-            <td>${desc}%</td>
+            <td>R$ ${desc.toFixed(2)}</td>
             <td>R$ ${totalServ.toFixed(2)}</td>
             <td><button class="btn btn-danger btn-sm" onclick="removerItem('s', ${i})">Remover</button></td>
           </tr>`;
@@ -746,9 +746,6 @@
       }
     }
 
-    /* =========================
-      EXCLUSÃO VENDA
-      ========================= */
     function abrirModalExclusaoVenda() {
       modalExcluirVenda.show();
     }

@@ -1,5 +1,5 @@
 body {
-  background-color: #f6f8fa;
+  background-color: #f2f2f2;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
 }
@@ -15,7 +15,7 @@ body {
   background-color: #ffffff;
   padding: 40px 35px;
   border-radius: 20px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   width: 100%;
   max-width: 400px;
 }
@@ -81,4 +81,20 @@ body {
 .img-logo{
   width: 5%;
   padding-right: 1%;
+}
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
+  margin-top: auto;
+}
+html, body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.container, .container-fluid {
+  flex: 1;
 }
